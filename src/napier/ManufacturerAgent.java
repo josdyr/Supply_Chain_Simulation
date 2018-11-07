@@ -1,5 +1,8 @@
 package napier;
 
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -10,11 +13,19 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import supply_chain_simulation_ontology.ECommerceOntology;
 
 public class ManufacturerAgent extends Agent {
 	
+	private Codec codec = new SLCodec();
+	private Ontology ontology = ECommerceOntology.getInstance();
+	
 	//This method is called when the agent is launched
 	protected void setup() {
+		
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(ontology);
+		
 		// Print out a welcome message
 		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
 		

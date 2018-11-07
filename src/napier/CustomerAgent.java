@@ -3,6 +3,9 @@ package napier;
 import java.util.ArrayList;
 import java.util.Random;
 
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
@@ -11,6 +14,7 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import supply_chain_simulation_ontology.ECommerceOntology;
 
 public class CustomerAgent extends Agent {
 	
@@ -25,8 +29,15 @@ public class CustomerAgent extends Agent {
 	
 	Order myOrder;
 	
+	private Codec codec = new SLCodec();
+	private Ontology ontology = ECommerceOntology.getInstance();
+	
 	//This method is called when the agent is launched
 	protected void setup() {
+		
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(ontology);
+		
 		// Print out a welcome message
 		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
 		
@@ -112,7 +123,11 @@ public class CustomerAgent extends Agent {
 			protected void onTick() {
 				//send a message to all receiver agents
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				
 				msg.setContent("Hello from agent: " + myAgent.getLocalName());
+				
+				//use this insted of setContent()
+				//getContentManager.fillContent();
 				
 				//add receivers
 				for (AID receiver : receiverAgents) {
