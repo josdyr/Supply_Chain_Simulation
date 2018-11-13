@@ -19,6 +19,10 @@ public class Application {
 			AgentController rma = myContainer.createNewAgent("rma", "jade.tools.rma.rma", null);
 			rma.start();
 			
+			// SynchTickerAgent
+			AgentController SynchTickerAgent = myContainer.createNewAgent("mySynchTickerAgent", SynchTickerAgent.class.getCanonicalName(), null);
+			SynchTickerAgent.start();
+			
 			AgentController SupplierAgent = myContainer.createNewAgent("mySupplierAgent", SupplierAgent.class.getCanonicalName(), null);
 			SupplierAgent.start();
 			
