@@ -13,7 +13,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import napier.ManufacturerAgent.DailyBehaviour;
 import supply_chain_simulation_ontology.ECommerceOntology;
 
 public class SupplierAgent extends Agent {
@@ -48,11 +47,16 @@ public class SupplierAgent extends Agent {
 			e.printStackTrace();
 		}
 		
-		addBehaviour(new DailyBehaviour());
+		addBehaviour(new TickerWaiter(this));
 		
 	}
 	
-	public class DailyBehaviour extends CyclicBehaviour {
+	public class TickerWaiter extends CyclicBehaviour {
+		
+		//behaviour to wait for a new day
+		public TickerWaiter(Agent a) {
+			super(a);
+		}
 		
 		@Override
 		public void action() {
@@ -65,7 +69,7 @@ public class SupplierAgent extends Agent {
 				}
 				// Do computation here
 				day++;
-				System.out.println(getLocalName() + " day: " + day);
+				System.out.println("    " + getLocalName() + " day: " + day);
 				
 				addBehaviour(new WakerBehaviour(myAgent, 2000) {
 					protected void onWake() {

@@ -1,12 +1,15 @@
 package napier;
 
-import java.util.ArrayList; import jade.core.AID;
+import java.util.ArrayList;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription; import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.lang.acl.ACLMessage; import jade.lang.acl.MessageTemplate;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 public class SynchTickerAgent extends Agent {
 	
@@ -31,8 +34,10 @@ public class SynchTickerAgent extends Agent {
 		
 		// Make sure all agents have started
 		System.out.println("Waiting to make sure all agents get enrolled...");
-		doWait(5000);
-		System.out.println("=== Starting simulation ===");
+		doWait(1000);
+		
+		System.out.println("\n\n" + "=== Starting simulation ===" + "\n");
+		
 		addBehaviour(new SynchAgentsBehaviour(this));
 		
 	}
@@ -59,6 +64,7 @@ public class SynchTickerAgent extends Agent {
 		
 		@Override
 		public void action () {
+			
 			switch(step) {
 			case 0:
 				//find all agents using directory service
@@ -83,19 +89,19 @@ public class SynchTickerAgent extends Agent {
 					DFAgentDescription[] agentsType1 = DFService.search(myAgent, template1);
 					for (int i = 0; i < agentsType1.length; i++) {
 						simulationAgents.add(agentsType1[i].getName());
-						System.out.println(agentsType1[i].getName());
+//						System.out.println(agentsType1[i].getName());
 					}
 					//search for agents of type "manufacturer-agent"
 					DFAgentDescription[] agentsType2 = DFService.search(myAgent, template2);
 					for (int i = 0; i < agentsType2.length; i++) {
 						simulationAgents.add(agentsType2[i].getName());
-						System.out.println(agentsType2[i].getName());
+//						System.out.println(agentsType2[i].getName());
 					}
 					//search for agents of type "supplyer-agent"
 					DFAgentDescription[] agentsType3 = DFService.search(myAgent, template3);
 					for (int i = 0; i < agentsType3.length; i++) {
 						simulationAgents.add(agentsType3[i].getName());
-						System.out.println(agentsType3[i].getName());
+//						System.out.println(agentsType3[i].getName());
 					}
 				}
 				catch (FIPAException e) {
@@ -109,6 +115,7 @@ public class SynchTickerAgent extends Agent {
 					tick.addReceiver(id);
 				}
 				myAgent.send(tick);
+				System.out.println("= New Day =");
 				step++;
 				break;
 				
@@ -140,7 +147,7 @@ public class SynchTickerAgent extends Agent {
 		
 		@Override
 		public int onEnd () {
-			System.out.println("= End of day =");
+			System.out.println("= End of day =" + "\n");
 			reset();
 			myAgent.addBehaviour(this);
 			return 0;

@@ -10,7 +10,9 @@ public class PC {
 	Boolean screen;
 	String cpu;
 	String motherboard;
-	String memory, harddrive, os;
+	String memory;
+	String harddrive;
+	String os;
 
 	public PC() {
 		

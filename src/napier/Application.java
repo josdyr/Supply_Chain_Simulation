@@ -23,14 +23,24 @@ public class Application {
 			AgentController SynchTickerAgent = myContainer.createNewAgent("mySynchTickerAgent", SynchTickerAgent.class.getCanonicalName(), null);
 			SynchTickerAgent.start();
 			
-			AgentController SupplierAgent = myContainer.createNewAgent("mySupplierAgent", SupplierAgent.class.getCanonicalName(), null);
-			SupplierAgent.start();
+			// Spin off SupplierAgent
+			int numSupplierAgent = 1;
+			AgentController SupplierAgent;
+			for(int i = 0; i < numSupplierAgent; i++) {
+				SupplierAgent = myContainer.createNewAgent("mySupplierAgent", SupplierAgent.class.getCanonicalName(), null);
+				SupplierAgent.start();
+			}
 			
 			AgentController ManufacturerAgent = myContainer.createNewAgent("myManufacturerAgent", ManufacturerAgent.class.getCanonicalName(), null);
 			ManufacturerAgent.start();
 			
-			AgentController CustomerAgent = myContainer.createNewAgent("myCustomerAgent", CustomerAgent.class.getCanonicalName(), null);
-			CustomerAgent.start();
+			// Spin off CustumerAgents
+			int numCustumerAgents = 1;
+			AgentController CustomerAgent;
+			for(int i = 0; i < numCustumerAgents; i++) {
+				CustomerAgent = myContainer.createNewAgent("myCustomerAgent", CustomerAgent.class.getCanonicalName(), null);
+				CustomerAgent.start();
+			}
 			
 		} catch (Exception e) {
 			System.out.println("Exception starting agent: " + e.toString());

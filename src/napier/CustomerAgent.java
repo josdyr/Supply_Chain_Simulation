@@ -11,6 +11,8 @@ import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
@@ -61,24 +63,22 @@ public class CustomerAgent extends Agent {
 			e.printStackTrace();
 		}
 		
-//		addBehaviour(new SearchYellowPages(this, (1000)));
-//		addBehaviour(new SenderBehaviour(this, (TIME_OF_ONE_DAY / SPEED_UP_SIMULATION)));
-		addBehaviour(new DailyBehaviour());
+		addBehaviour(new TickerWaiter(this));
 		
 		// Print out a welcome message
 		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
 		
-//		//generate 90 random orders
-//		for (int i = 0; i < 90; i++) {
-//			
-//			//create random PCs
-//			PC myPC = new PC();
-//			
-//			//create random order & print it
-//			myOrder = new Order(myPC);
-//			System.out.println("myOrder: " + myOrder.printOrder());
-//			
-//		}
+		//generate 90 random orders
+		for (int i = 0; i < 90; i++) {
+			
+			//create random PCs
+			PC myPC = new PC();
+			
+			//create random order & print it
+			myOrder = new Order(myPC);
+			System.out.println("myOrder: " + myOrder.printOrder());
+			
+		}
 		
 	}
 	
@@ -91,7 +91,12 @@ public class CustomerAgent extends Agent {
 		}
 	}
 	
-	public class DailyBehaviour extends CyclicBehaviour {
+	public class TickerWaiter extends CyclicBehaviour {
+		
+		//behaviour to wait for a new day
+		public TickerWaiter(Agent a) {
+			super(a);
+		}
 		
 		@Override
 		public void action() {
@@ -102,20 +107,29 @@ public class CustomerAgent extends Agent {
 				if (tickerAgent == null) {
 					tickerAgent = msg.getSender();
 				}
-				// Do computation here
-				day++;
-				System.out.println(getLocalName() + " day: " + day);
-				
-				addBehaviour(new WakerBehaviour(myAgent, 2000) {
-					protected void onWake() {
-						// Send a done message
-						ACLMessage dayDone = new ACLMessage(ACLMessage.INFORM);
-						dayDone.addReceiver(tickerAgent);
-						dayDone.setContent("done");
-						myAgent.send(dayDone);
-					}
-				});
-				
+				if(msg.getContent().equals("new day")) {
+					
+					day++;
+					System.out.println("    " + getLocalName() + " day: " + day);
+					
+					//spawn new sequential behaviour for day's activities
+					SequentialBehaviour dailyActivity = new SequentialBehaviour();
+					
+					//sub-behaviours will execute in the order they are added
+					// ...
+					
+					//normal behaviours will execute normally
+					myAgent.addBehaviour(new SearchYellowPages(myAgent, (1000)));
+					myAgent.addBehaviour(new SenderBehaviour(myAgent, (2000)));
+					myAgent.addBehaviour(new EndDay(myAgent));
+					
+					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
+					myAgent.addBehaviour(dailyActivity);
+				}
+				else {
+					//termination message to end simulation
+					myAgent.doDelete();
+				}
 			} else {
 				block();
 			}
@@ -123,61 +137,87 @@ public class CustomerAgent extends Agent {
 		
 	}
 	
-//	//create the SearchYellowPages behaviour
-//	public class SearchYellowPages extends TickerBehaviour {
-//		
-//		public SearchYellowPages(Agent agent, long period) {
-//			super(agent, period);
-//		}
-//		
-//		@Override
-//		protected void onTick() {
-//			//create a template
-//			DFAgentDescription dfd = new DFAgentDescription();
-//			ServiceDescription sd = new ServiceDescription();
-//			
-//			sd.setType("manufacturer-agent");;
-//			dfd.addServices(sd);
-//			
-//			//query the dfAgent
-//			try {
-//				DFAgentDescription[] result = DFService.search(myAgent, dfd);
-//				receiverAgents.clear();
-//				for (int i = 0; i < result.length; i++) {
-//					receiverAgents.add(result[i].getName()); //.getName() = AID
-//				}
-//			} catch (FIPAException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		
-//	}
+	//create the SearchYellowPages behaviour
+	public class SearchYellowPages extends TickerBehaviour {
+		
+		public SearchYellowPages(Agent agent, long period) {
+			super(agent, period);
+		}
+		
+		@Override
+		protected void onTick() {
+			//create a template
+			DFAgentDescription dfd = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			
+			sd.setType("manufacturer-agent");;
+			dfd.addServices(sd);
+			
+			//query the dfAgent
+			try {
+				DFAgentDescription[] result = DFService.search(myAgent, dfd);
+				System.out.println("    " + "Searching the Yellow Pages...");
+				receiverAgents.clear();
+				for (int i = 0; i < result.length; i++) {
+					receiverAgents.add(result[i].getName()); //.getName() = AID
+				}
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
 	
-//	//create the SenderBehaviour behaviour
-//	public class SenderBehaviour extends TickerBehaviour {
-//		
-//		public SenderBehaviour(Agent agent, long period) {
-//			super(agent, period);
-//		}
-//		
-//		@Override
-//		protected void onTick() {
-//			//send a message to all receiver agents
-//			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-//			
-//			msg.setContent("Hello from agent: " + myAgent.getLocalName());
-//			
-//			//use this insted of setContent()
-//			//getContentManager.fillContent();
-//			
-//			//add receivers
-//			for (AID receiver : receiverAgents) {
-//				msg.addReceiver(receiver);
+	//create the SenderBehaviour behaviour
+	public class SenderBehaviour extends TickerBehaviour {
+		
+		public SenderBehaviour(Agent agent, long period) {
+			super(agent, period);
+		}
+		
+		@Override
+		protected void onTick() {
+			
+			//send a message to all receiver agents
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			
+			msg.setContent("Hello from agent: " + myAgent.getLocalName());
+			
+			//use this instead of setContent()
+			//getContentManager.fillContent();
+			
+			//add receivers
+			for (AID receiver : receiverAgents) {
+				msg.addReceiver(receiver);
+			}
+			myAgent.send(msg);
+			System.out.println("    " + "sending msg: " + msg);
+		}
+		
+	}
+	
+	public class EndDay extends OneShotBehaviour {
+		
+		public EndDay(Agent a) {
+			super(a);
+		}
+
+		@Override
+		public void action() {
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			msg.addReceiver(tickerAgent);
+			msg.setContent("done");
+			myAgent.send(msg);
+			
+//			//send a message to each seller that we have finished
+//			ACLMessage buyerDone = new ACLMessage(ACLMessage.INFORM);
+//			buyerDone.setContent("done");
+//			for(AID seller : sellers) {
+//				buyerDone.addReceiver(seller);
 //			}
-//			myAgent.send(msg);
-//			//System.out.println("sending msg: " + msg);
-//		}
-//		
-//	}
+//			myAgent.send(buyerDone);
+		}
+		
+	}
 	
 }
