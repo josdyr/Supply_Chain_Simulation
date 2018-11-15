@@ -1,9 +1,6 @@
 package napier;
 
 import java.util.ArrayList;
-import java.util.Random;
-
-import com.sun.org.apache.xpath.internal.axes.WalkerFactory;
 
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
@@ -14,7 +11,6 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
-import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -183,15 +179,12 @@ public class CustomerAgent extends Agent {
 			
 			msg.setContent("Hello from agent: " + myAgent.getLocalName());
 			
-			//use this instead of setContent()
-			//getContentManager.fillContent();
-			
 			//add receivers
 			for (AID receiver : receiverAgents) {
 				msg.addReceiver(receiver);
 			}
 			myAgent.send(msg);
-			System.out.println("    " + "sending msg: " + msg);
+//			System.out.println("    " + "sending msg: " + msg);
 		}
 		
 	}

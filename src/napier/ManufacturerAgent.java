@@ -6,7 +6,9 @@ import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ReceiverBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
@@ -15,6 +17,9 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import napier.CustomerAgent.EndDay;
+import napier.CustomerAgent.SearchYellowPages;
+import napier.CustomerAgent.SenderBehaviour;
 import supply_chain_simulation_ontology.ECommerceOntology;
 
 public class ManufacturerAgent extends Agent {
@@ -79,20 +84,28 @@ public class ManufacturerAgent extends Agent {
 				if (tickerAgent == null) {
 					tickerAgent = msg.getSender();
 				}
-				// Do computation here
-				day++;
-				System.out.println("    " + getLocalName() + " day: " + day);
-				
-				addBehaviour(new WakerBehaviour(myAgent, 2000) {
-					protected void onWake() {
-						// Send a done message
-						ACLMessage dayDone = new ACLMessage(ACLMessage.INFORM);
-						dayDone.addReceiver(tickerAgent);
-						dayDone.setContent("done");
-						myAgent.send(dayDone);
-					}
-				});
-				
+				if(msg.getContent().equals("new day") || msg.getContent().equals("hello from")) {
+					
+					day++;
+					System.out.println("    " + getLocalName() + " day: " + day);
+					
+					//spawn new sequential behaviour for day's activities
+					SequentialBehaviour dailyActivity = new SequentialBehaviour();
+					
+					//sub-behaviours will execute in the order they are added
+					// ...
+					
+					//normal behaviours will execute normally
+					myAgent.addBehaviour(new ReceiverBehaviour(myAgent));
+					myAgent.addBehaviour(new EndDay(myAgent));
+					
+					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
+					myAgent.addBehaviour(dailyActivity);
+				}
+				else {
+					//termination message to end simulation
+					myAgent.doDelete();
+				}
 			} else {
 				block();
 			}
@@ -100,31 +113,56 @@ public class ManufacturerAgent extends Agent {
 		
 	}
 	
-//	//create a cyclic behaviour
-//	public class ReceiverBehaviour extends CyclicBehaviour {
-//		
-//		public ReceiverBehaviour(Agent agent) {
-//			super(agent);
-//		}
-//		
-//		@Override
-//		public void action() {
-//			//try to receive a message
-//			ACLMessage msg = myAgent.receive();
-//			if (msg != null) {
-//				// process the message
-//				System.out.println(
-//						"Agent: " + myAgent.getLocalName() + "\n" +
-//						"\t" + "Message received from " + msg.getSender() + "\n" +
-//						"\t" + "msg: " + msg.getContent() + "\n"
-//						);
+	//create a cyclic behaviour
+	public class ReceiverBehaviour extends CyclicBehaviour {
+		
+		public ReceiverBehaviour(Agent agent) {
+			super(agent);
+		}
+		
+		@Override
+		public void action() {
+			//try to receive a message
+			ACLMessage msg = myAgent.receive();
+			if (msg != null) {
+				// process the message
+				System.out.println(
+						"    Agent: " + myAgent.getLocalName() + "\n" +
+						"\t" + "Message received from " + msg.getSender() + "\n" +
+						"\t" + "msg: " + msg.getContent() + "\n"
+						);
+			}
+			else {
+				//put the behaviour to sleep until a message arrives
+				block();
+				System.out.println("    " + myAgent.getLocalName() + " waiting for message...");
+			}
+		}
+		
+	}
+	
+	public class EndDay extends OneShotBehaviour {
+		
+		public EndDay(Agent a) {
+			super(a);
+		}
+
+		@Override
+		public void action() {
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			msg.addReceiver(tickerAgent);
+			msg.setContent("done");
+			myAgent.send(msg);
+			
+//			//send a message to each seller that we have finished
+//			ACLMessage buyerDone = new ACLMessage(ACLMessage.INFORM);
+//			buyerDone.setContent("done");
+//			for(AID seller : sellers) {
+//				buyerDone.addReceiver(seller);
 //			}
-//			else {
-//				//put the behaviour to sleep until a message arrives
-//				block();
-//			}
-//		}
-//		
-//	}
+//			myAgent.send(buyerDone);
+		}
+		
+	}
 	
 }
