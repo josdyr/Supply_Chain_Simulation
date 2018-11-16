@@ -13,6 +13,8 @@ import jade.lang.acl.MessageTemplate;
 
 public class SynchTickerAgent extends Agent {
 	
+	public static final int NUM_DAYS = 30;
+	
 	@Override
 	protected void setup() {
 		//add this agent to the yellow pages
@@ -34,7 +36,7 @@ public class SynchTickerAgent extends Agent {
 		
 		// Make sure all agents have started
 		System.out.println("Waiting to make sure all agents get enrolled...");
-		doWait(1000);
+		doWait(2000);
 		
 		System.out.println("\n\n" + "=== Starting simulation ===" + "\n");
 		
@@ -56,6 +58,7 @@ public class SynchTickerAgent extends Agent {
 		
 		private int step = 0; //where we are in the behaviour
 		private int numFinReceived = 0; //number of finished messages from other agents
+		private int day = 0;
 		private ArrayList<AID> simulationAgents = new ArrayList<>();
 		
 		public SynchAgentsBehaviour(Agent a) {
@@ -68,8 +71,6 @@ public class SynchTickerAgent extends Agent {
 			switch(step) {
 			case 0:
 				//find all agents using directory service
-				//here we have two types of agent
-				//"simulation-agent" and "simulation-agent2"
 				DFAgentDescription template1 = new DFAgentDescription();
 				ServiceDescription sd1 = new ServiceDescription();
 				sd1.setType("customer-agent");
@@ -114,9 +115,10 @@ public class SynchTickerAgent extends Agent {
 				for (AID id : simulationAgents) {
 					tick.addReceiver(id);
 				}
-				myAgent.send(tick);
 				System.out.println("= New Day =");
+				myAgent.send(tick);
 				step++;
+				day++;
 				break;
 				
 			case 1:
@@ -142,14 +144,30 @@ public class SynchTickerAgent extends Agent {
 		
 		@Override
 		public void reset () {
-			step = 0; numFinReceived = 0;
+			super.reset();
+			step = 0;
+			simulationAgents.clear();
+			numFinReceived = 0;
 		}
 		
 		@Override
-		public int onEnd () {
-			System.out.println("= End of day =" + "\n");
-			reset();
-			myAgent.addBehaviour(this);
+		public int onEnd() {
+			System.out.println("= End of day " + day + " =\n");
+			if(day == NUM_DAYS) {
+				//send termination message to each agent
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				msg.setContent("terminate");
+				for(AID agent : simulationAgents) {
+					msg.addReceiver(agent);
+				}
+				myAgent.send(msg);
+				myAgent.doDelete();
+			}
+			else {
+				reset();
+				myAgent.addBehaviour(this);
+			}
+			
 			return 0;
 		}
 		

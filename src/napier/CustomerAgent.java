@@ -27,7 +27,7 @@ public class CustomerAgent extends Agent {
 	static int TIME_OF_ONE_DAY = 24 * 60 * 60 * 1000;
 	static int SPEED_UP_SIMULATION = 100000; //equates to one second
 	
-	private ArrayList<AID> receiverAgents = new ArrayList<>();
+	private ArrayList<AID> manufacturerAgents = new ArrayList<>();
 	
 	String memory = "";
 	String hardDrive = "";
@@ -97,7 +97,7 @@ public class CustomerAgent extends Agent {
 		@Override
 		public void action() {
 			// Wait for new daily message
-			MessageTemplate mt = MessageTemplate.MatchContent("new day");
+			MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchContent("new day"), MessageTemplate.MatchContent("terminate"));
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				if (tickerAgent == null) {
@@ -112,15 +112,16 @@ public class CustomerAgent extends Agent {
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					
 					//sub-behaviours will execute in the order they are added
-					// ...
-					
-					//normal behaviours will execute normally
-					myAgent.addBehaviour(new SearchYellowPages(myAgent, (1000)));
-					myAgent.addBehaviour(new SenderBehaviour(myAgent, (2000)));
-					myAgent.addBehaviour(new EndDay(myAgent));
+					dailyActivity.addSubBehaviour(new FindManufacturer(myAgent));
+					dailyActivity.addSubBehaviour(new SenderBehaviour(myAgent));
+					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
 					myAgent.addBehaviour(dailyActivity);
+					
+					//normal behaviours will execute normally
+					// ...
+					
 				}
 				else {
 					//termination message to end simulation
@@ -134,14 +135,14 @@ public class CustomerAgent extends Agent {
 	}
 	
 	//create the SearchYellowPages behaviour
-	public class SearchYellowPages extends TickerBehaviour {
+	public class FindManufacturer extends OneShotBehaviour {
 		
-		public SearchYellowPages(Agent agent, long period) {
-			super(agent, period);
+		public FindManufacturer(Agent agent) {
+			super(agent);
 		}
 		
 		@Override
-		protected void onTick() {
+		public void action() {
 			//create a template
 			DFAgentDescription dfd = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();
@@ -151,11 +152,11 @@ public class CustomerAgent extends Agent {
 			
 			//query the dfAgent
 			try {
+				manufacturerAgents.clear();
 				DFAgentDescription[] result = DFService.search(myAgent, dfd);
-				System.out.println("    " + "Searching the Yellow Pages...");
-				receiverAgents.clear();
+				
 				for (int i = 0; i < result.length; i++) {
-					receiverAgents.add(result[i].getName()); //.getName() = AID
+					manufacturerAgents.add(result[i].getName()); //.getName() = AID
 				}
 			} catch (FIPAException e) {
 				e.printStackTrace();
@@ -165,14 +166,14 @@ public class CustomerAgent extends Agent {
 	}
 	
 	//create the SenderBehaviour behaviour
-	public class SenderBehaviour extends TickerBehaviour {
+	public class SenderBehaviour extends OneShotBehaviour {
 		
-		public SenderBehaviour(Agent agent, long period) {
-			super(agent, period);
+		public SenderBehaviour(Agent agent) {
+			super(agent);
 		}
 		
 		@Override
-		protected void onTick() {
+		public void action() {
 			
 			//send a message to all receiver agents
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -180,7 +181,7 @@ public class CustomerAgent extends Agent {
 			msg.setContent("Hello from agent: " + myAgent.getLocalName());
 			
 			//add receivers
-			for (AID receiver : receiverAgents) {
+			for (AID receiver : manufacturerAgents) {
 				msg.addReceiver(receiver);
 			}
 			myAgent.send(msg);

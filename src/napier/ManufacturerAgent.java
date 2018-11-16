@@ -9,17 +9,12 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ReceiverBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
-import jade.core.behaviours.TickerBehaviour;
-import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import napier.CustomerAgent.EndDay;
-import napier.CustomerAgent.SearchYellowPages;
-import napier.CustomerAgent.SenderBehaviour;
 import supply_chain_simulation_ontology.ECommerceOntology;
 
 public class ManufacturerAgent extends Agent {
@@ -84,7 +79,7 @@ public class ManufacturerAgent extends Agent {
 				if (tickerAgent == null) {
 					tickerAgent = msg.getSender();
 				}
-				if(msg.getContent().equals("new day") || msg.getContent().equals("hello from")) {
+				if(msg.getContent().equals("new day")) {
 					
 					day++;
 					System.out.println("    " + getLocalName() + " day: " + day);
@@ -93,14 +88,15 @@ public class ManufacturerAgent extends Agent {
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					
 					//sub-behaviours will execute in the order they are added
-					// ...
-					
-					//normal behaviours will execute normally
-					myAgent.addBehaviour(new ReceiverBehaviour(myAgent));
-					myAgent.addBehaviour(new EndDay(myAgent));
+					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
+					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
 					myAgent.addBehaviour(dailyActivity);
+					
+					//normal behaviours will execute normally
+					// ...
+					
 				}
 				else {
 					//termination message to end simulation
@@ -114,7 +110,7 @@ public class ManufacturerAgent extends Agent {
 	}
 	
 	//create a cyclic behaviour
-	public class ReceiverBehaviour extends CyclicBehaviour {
+	public class ReceiverBehaviour extends OneShotBehaviour {
 		
 		public ReceiverBehaviour(Agent agent) {
 			super(agent);
@@ -123,11 +119,12 @@ public class ManufacturerAgent extends Agent {
 		@Override
 		public void action() {
 			//try to receive a message
-			ACLMessage msg = myAgent.receive();
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// process the message
 				System.out.println(
-						"    Agent: " + myAgent.getLocalName() + "\n" +
+						"    " + "Agent: " + myAgent.getLocalName() + "\n" +
 						"\t" + "Message received from " + msg.getSender() + "\n" +
 						"\t" + "msg: " + msg.getContent() + "\n"
 						);

@@ -6,7 +6,8 @@ import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.WakerBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -67,23 +68,54 @@ public class SupplierAgent extends Agent {
 				if (tickerAgent == null) {
 					tickerAgent = msg.getSender();
 				}
-				// Do computation here
-				day++;
-				System.out.println("    " + getLocalName() + " day: " + day);
-				
-				addBehaviour(new WakerBehaviour(myAgent, 2000) {
-					protected void onWake() {
-						// Send a done message
-						ACLMessage dayDone = new ACLMessage(ACLMessage.INFORM);
-						dayDone.addReceiver(tickerAgent);
-						dayDone.setContent("done");
-						myAgent.send(dayDone);
-					}
-				});
-				
+				if(msg.getContent().equals("new day")) {
+					
+					day++;
+					System.out.println("    " + getLocalName() + " day: " + day);
+					
+					//spawn new sequential behaviour for day's activities
+					SequentialBehaviour dailyActivity = new SequentialBehaviour();
+					
+					//sub-behaviours will execute in the order they are added
+					// ...
+					
+					//normal behaviours will execute normally
+					myAgent.addBehaviour(new EndDay(myAgent));
+					
+					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
+					myAgent.addBehaviour(dailyActivity);
+				}
+				else {
+					//termination message to end simulation
+					myAgent.doDelete();
+				}
 			} else {
 				block();
 			}
+		}
+		
+	}
+	
+	public class EndDay extends OneShotBehaviour {
+		
+		public EndDay(Agent a) {
+			super(a);
+		}
+
+		@Override
+		public void action() {
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			msg.addReceiver(tickerAgent);
+			msg.setContent("done");
+			myAgent.send(msg);
+			
+//			//send a message to each seller that we have finished
+//			ACLMessage buyerDone = new ACLMessage(ACLMessage.INFORM);
+//			buyerDone.setContent("done");
+//			for(AID seller : sellers) {
+//				buyerDone.addReceiver(seller);
+//			}
+//			myAgent.send(buyerDone);
 		}
 		
 	}
