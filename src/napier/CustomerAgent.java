@@ -64,18 +64,6 @@ public class CustomerAgent extends Agent {
 		// Print out a welcome message
 		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
 		
-		//generate 90 random orders
-		for (int i = 0; i < 90; i++) {
-			
-			//create random PCs
-			PC myPC = new PC();
-			
-			//create random order & print it
-			myOrder = new Order(myPC);
-			System.out.println("myOrder: " + myOrder.printOrder());
-			
-		}
-		
 	}
 	
 	protected void takeDown() {
@@ -113,7 +101,8 @@ public class CustomerAgent extends Agent {
 					
 					//sub-behaviours will execute in the order they are added
 					dailyActivity.addSubBehaviour(new FindManufacturer(myAgent));
-					dailyActivity.addSubBehaviour(new SenderBehaviour(myAgent));
+					dailyActivity.addSubBehaviour(new GenerateOrder(myAgent));
+					dailyActivity.addSubBehaviour(new SendOrder(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
@@ -165,10 +154,33 @@ public class CustomerAgent extends Agent {
 		
 	}
 	
-	//create the SenderBehaviour behaviour
-	public class SenderBehaviour extends OneShotBehaviour {
+	public class GenerateOrder extends OneShotBehaviour {
 		
-		public SenderBehaviour(Agent agent) {
+		public GenerateOrder(Agent agent) {
+			super(agent);
+		}
+		
+		@Override
+		public void action() {
+			
+			//create random PCs
+			PC myPC = new PC();
+			
+			//create random order & print it
+			myOrder = new Order(myPC);
+			System.out.println(
+					"\n" + "    " + "Agent: myCustomerAgent:" +
+					"\n" +"    " + "  " + "myOrder: " + myOrder.printOrder()
+					);
+			
+		}
+		
+	}
+	
+	//create the SenderBehaviour behaviour
+	public class SendOrder extends OneShotBehaviour {
+		
+		public SendOrder(Agent agent) {
 			super(agent);
 		}
 		
@@ -176,7 +188,7 @@ public class CustomerAgent extends Agent {
 		public void action() {
 			
 			//send a message to all receiver agents
-			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 			
 			msg.setContent("Hello from agent: " + myAgent.getLocalName());
 			

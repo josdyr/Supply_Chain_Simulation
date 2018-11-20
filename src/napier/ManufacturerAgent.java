@@ -119,14 +119,14 @@ public class ManufacturerAgent extends Agent {
 		@Override
 		public void action() {
 			//try to receive a message
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// process the message
 				System.out.println(
-						"    " + "Agent: " + myAgent.getLocalName() + "\n" +
+						"\n" + "    " + "Agent: " + myAgent.getLocalName() + "\n" +
 						"\t" + "Message received from " + msg.getSender() + "\n" +
-						"\t" + "msg: " + msg.getContent() + "\n"
+						"\t" + "msg: " + msg.getContent()
 						);
 			}
 			else {
