@@ -23,7 +23,7 @@ public class Application {
 			AgentController SynchTickerAgent = myContainer.createNewAgent("mySynchTickerAgent", SynchTickerAgent.class.getCanonicalName(), null);
 			SynchTickerAgent.start();
 
-			// Spin off SupplierAgent
+			// Spin off SupplierAgents
 			int numSupplierAgent = 1;
 			AgentController SupplierAgent;
 			for(int i = 0; i < numSupplierAgent; i++) {
@@ -31,6 +31,7 @@ public class Application {
 				SupplierAgent.start();
 			}
 
+			// Spin off one ManufacturerAgent
 			AgentController ManufacturerAgent = myContainer.createNewAgent("myManufacturerAgent", ManufacturerAgent.class.getCanonicalName(), null);
 			ManufacturerAgent.start();
 

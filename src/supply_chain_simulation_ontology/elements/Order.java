@@ -1,13 +1,16 @@
-package napier;
+package supply_chain_simulation_ontology.elements;
 
 import java.lang.*;
 import java.util.Random;
 
-public class Order {
+import jade.content.Concept;
+
+public class Order implements Concept {
 	
 	Random rand = new Random();
 	
 	PC myPC;
+	
 	int quantity = (int)Math.floor(1 + 50 * rand.nextFloat());
 	int price = (int)Math.floor(600 + 200 * rand.nextFloat());
 	int total_price = (int)quantity * price;
