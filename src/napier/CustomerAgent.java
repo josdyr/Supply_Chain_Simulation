@@ -202,59 +202,21 @@ public class CustomerAgent extends Agent {
 		@Override
 		public void action() {
 			
-//			System.out.println("Hello");
-//			
-//			//send a message to all receiver agents
-//			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-//			//add receivers
-//			for (AID receiver : manufacturerAgents) {
-//				msg.addReceiver(receiver);
-//			}
-//			msg.setLanguage(codec.getName());
-//			msg.setOntology(ontology.getName());
-//			
-//			// Action Wrapper
-//			Action request = new Action();
-//			request.setAction(myOrder);
-//			request.setActor(manufacturerAgents.get(0));
-//			
-//			try {
-//				getContentManager().fillContent(msg, request);
-//				send(msg);
-//			} catch (CodecException ce) {
-//				ce.printStackTrace();
-//			} catch (OntologyException oe) {
-//				oe.printStackTrace();
-//			}
-			
-			// Prepare the action request message
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-			msg.addReceiver(myManufacturerAgentAID); // sellerAID is the AID of the Seller agent
+			msg.addReceiver(myManufacturerAgentAID);
 			msg.setLanguage(codec.getName());
-			msg.setOntology(ontology.getName()); 
-			// Prepare the content. 
-			CD cd = new CD();
-			cd.setName("Synchronicity");
-			cd.setSerialNumber(123);
-			ArrayList<Track> tracks = new ArrayList<Track>();
-			Track t = new Track();
-			t.setName("Every breath you take");
-			t.setDuration(230);
-			tracks.add(t);
-			t = new Track();
-			t.setName("King of pain");
-			t.setDuration(500);
-			tracks.add(t);
-			cd.setTracks(tracks);
-			Sell order = new Sell();
-			order.setBuyer(myAgent.getAID());
-			order.setItem(cd);
+			msg.setOntology(ontology.getName());
+			
+			myPC = new PC();
+			myOrder = new Order(myPC);
+			
+			// Action Wrapper
 			Action request = new Action();
-			request.setAction(order);
+			request.setAction(myOrder);
 			request.setActor(myManufacturerAgentAID);
 			
 			try {
-				getContentManager().fillContent(msg, request); //send the wrapper object
+				getContentManager().fillContent(msg, request);
 				send(msg);
 			}
 			catch (CodecException ce) {

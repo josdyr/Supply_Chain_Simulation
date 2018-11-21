@@ -131,8 +131,8 @@ public class ManufacturerAgent extends Agent {
 			}
 			else {
 				//put the behaviour to sleep until a message arrives
-				block();
 				System.out.println("    " + myAgent.getLocalName() + " waiting for message...");
+				block();
 			}
 		}
 		
