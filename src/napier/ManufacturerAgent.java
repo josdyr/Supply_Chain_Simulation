@@ -131,6 +131,9 @@ public class ManufacturerAgent extends Agent {
 					//normal behaviours will execute normally
 					// ...
 					
+					// Wait a bit only the first day in order to receive the first message
+					doWait(3000);
+					
 				}
 				else {
 					//termination message to end simulation
@@ -173,23 +176,21 @@ public class ManufacturerAgent extends Agent {
 					ce = getContentManager().extractContent(msg);
 					if(ce instanceof Action) {
 						Concept action = ((Action)ce).getAction();
-						if (action instanceof Sell) {
-							Sell order = (Sell)action;
-							Item it = order.getItem();
+						if (action instanceof Order) {
+							Order order = (Order)action;
+							PC _currentPC = order.getMyPC();
 							// Extract the CD name and print it to demonstrate use of the ontology
-							if(it instanceof CD){
-								CD cd = (CD)it;
+							if(_currentPC instanceof PC){
+								PC currentPC = (PC)_currentPC;
 								//check if seller has it in stock
-								if(itemsForSale.containsKey(cd.getSerialNumber())) {
-									System.out.println("Selling CD " + cd.getName());
-								}
-								else {
-									System.out.println("You tried to order something out of stock!!!! Check first!");
-								}
-
+//								if(itemsForSale.containsKey(cd.getSerialNumber())) {
+//									System.out.println("Selling CD " + cd.getName());
+//								}
+//								else {
+//									System.out.println("You tried to order something out of stock!!!! Check first!");
+//								}
 							}
 						}
-
 					}
 				}
 				catch (CodecException ce) {
