@@ -167,9 +167,9 @@ public class ManufacturerAgent extends Agent {
 					
 					// Print out the message content in SL
 					System.out.println(
-							"\n" + "    " + "Agent: " + myAgent.getLocalName() + "\n" +
+							"    " + "Agent: " + myAgent.getLocalName() + "\n" +
 							"\t" + "Message received from " + msg.getSender() + "\n" +
-							"\t" + "Content: " + msg.getContent());
+							"\t" + "Content: " + msg.getContent() + "\n");
 
 					// Let JADE convert from String to Java objects
 					// Output will be a ContentElement

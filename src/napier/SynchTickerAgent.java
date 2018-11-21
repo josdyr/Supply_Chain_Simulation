@@ -115,7 +115,7 @@ public class SynchTickerAgent extends Agent {
 				for (AID id : simulationAgents) {
 					tick.addReceiver(id);
 				}
-				System.out.println("= New Day =");
+				System.out.println("= New Day =" + "\n");
 				myAgent.send(tick);
 				step++;
 				day++;
