@@ -1,8 +1,13 @@
 package napier;
 
+import jade.content.Concept;
+import jade.content.ContentElement;
 import jade.content.lang.Codec;
+import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -15,7 +20,15 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+
 import supply_chain_simulation_ontology.ECommerceOntology;
+import supply_chain_simulation_ontology.elements.CD;
+import supply_chain_simulation_ontology.elements.Item;
+import supply_chain_simulation_ontology.elements.Order;
+import supply_chain_simulation_ontology.elements.Owns;
+import supply_chain_simulation_ontology.elements.PC;
+import supply_chain_simulation_ontology.elements.Sell;
+import supply_chain_simulation_ontology.elements.Track;
 
 public class ManufacturerAgent extends Agent {
 	
@@ -122,12 +135,50 @@ public class ManufacturerAgent extends Agent {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
-				// process the message
+				
+				// = process the message =
+				
 				System.out.println(
 						"\n" + "    " + "Agent: " + myAgent.getLocalName() + "\n" +
 						"\t" + "Message received from " + msg.getSender() + "\n" +
 						"\t" + "msg: " + msg.getContent()
 						);
+				
+//				try {
+//					ContentElement ce = null;
+//					System.out.println(msg.getContent()); //print out the message content in SL
+//
+//					// Let JADE convert from String to Java objects
+//					// Output will be a ContentElement
+//					ce = getContentManager().extractContent(msg);
+//					if(ce instanceof Action) {
+//						Concept action = ((Action)ce).getAction();
+//						if (action instanceof Sell) {
+//							Sell order = (Sell)action;
+//							Item it = order.getItem();
+//							// Extract the CD name and print it to demonstrate use of the ontology
+//							if(it instanceof CD){
+//								CD cd = (CD)it;
+//								//check if seller has it in stock
+//								if(itemsForSale.containsKey(cd.getSerialNumber())) {
+//									System.out.println("Selling CD " + cd.getName());
+//								}
+//								else {
+//									System.out.println("You tried to order something out of stock!!!! Check first!");
+//								}
+//
+//							}
+//						}
+//
+//					}
+//				}
+//				catch (CodecException ce) {
+//					ce.printStackTrace();
+//				}
+//				catch (OntologyException oe) {
+//					oe.printStackTrace();
+//				}
+				
 			}
 			else {
 				//put the behaviour to sleep until a message arrives

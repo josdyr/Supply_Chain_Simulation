@@ -20,7 +20,7 @@ public class Order implements AgentAction {
 	int due_in_days = (int)Math.floor(1 + 10 * rand.nextFloat());
 	
 	public Order(PC myPC) {
-		this.myPC = myPC;
+		setMyPC(myPC);
 	}
 	
 	public String printOrder() {

@@ -13,7 +13,7 @@ import jade.lang.acl.MessageTemplate;
 
 public class SynchTickerAgent extends Agent {
 	
-	public static final int NUM_DAYS = 30;
+	public static final int NUM_DAYS = 10;
 	
 	@Override
 	protected void setup() {
