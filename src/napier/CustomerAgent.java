@@ -20,11 +20,18 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import supply_chain_simulation_ontology.elements.Item;
+import supply_chain_simulation_ontology.elements.Owns;
+import supply_chain_simulation_ontology.elements.CD;
+import supply_chain_simulation_ontology.elements.Sell;
+import supply_chain_simulation_ontology.elements.Track;
 import supply_chain_simulation_ontology.ECommerceOntology;
 import supply_chain_simulation_ontology.elements.Order;
 import supply_chain_simulation_ontology.elements.PC;
 
 public class CustomerAgent extends Agent {
+	
+	private AID myManufacturerAgentAID;
 	
 	PC myPC;
 	Order myOrder;
@@ -46,6 +53,8 @@ public class CustomerAgent extends Agent {
 	
 	//This method is called when the agent is launched
 	protected void setup() {
+		
+		myManufacturerAgentAID = new AID("myManufacturerAgent", AID.ISLOCALNAME);
 		
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
@@ -193,28 +202,65 @@ public class CustomerAgent extends Agent {
 		@Override
 		public void action() {
 			
-			System.out.println("Hello");
+//			System.out.println("Hello");
+//			
+//			//send a message to all receiver agents
+//			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+//			//add receivers
+//			for (AID receiver : manufacturerAgents) {
+//				msg.addReceiver(receiver);
+//			}
+//			msg.setLanguage(codec.getName());
+//			msg.setOntology(ontology.getName());
+//			
+//			// Action Wrapper
+//			Action request = new Action();
+//			request.setAction(myOrder);
+//			request.setActor(manufacturerAgents.get(0));
+//			
+//			try {
+//				getContentManager().fillContent(msg, request);
+//				send(msg);
+//			} catch (CodecException ce) {
+//				ce.printStackTrace();
+//			} catch (OntologyException oe) {
+//				oe.printStackTrace();
+//			}
 			
-			//send a message to all receiver agents
+			// Prepare the action request message
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-			//add receivers
-			for (AID receiver : manufacturerAgents) {
-				msg.addReceiver(receiver);
-			}
+			msg.addReceiver(myManufacturerAgentAID); // sellerAID is the AID of the Seller agent
 			msg.setLanguage(codec.getName());
-			msg.setOntology(ontology.getName());
-			
-			// Action Wrapper
+			msg.setOntology(ontology.getName()); 
+			// Prepare the content. 
+			CD cd = new CD();
+			cd.setName("Synchronicity");
+			cd.setSerialNumber(123);
+			ArrayList<Track> tracks = new ArrayList<Track>();
+			Track t = new Track();
+			t.setName("Every breath you take");
+			t.setDuration(230);
+			tracks.add(t);
+			t = new Track();
+			t.setName("King of pain");
+			t.setDuration(500);
+			tracks.add(t);
+			cd.setTracks(tracks);
+			Sell order = new Sell();
+			order.setBuyer(myAgent.getAID());
+			order.setItem(cd);
 			Action request = new Action();
-			request.setAction(myOrder);
-			request.setActor(manufacturerAgents.get(0));
+			request.setAction(order);
+			request.setActor(myManufacturerAgentAID);
 			
 			try {
-				getContentManager().fillContent(msg, request);
+				getContentManager().fillContent(msg, request); //send the wrapper object
 				send(msg);
-			} catch (CodecException ce) {
+			}
+			catch (CodecException ce) {
 				ce.printStackTrace();
-			} catch (OntologyException oe) {
+			}
+			catch (OntologyException oe) {
 				oe.printStackTrace();
 			}
 			

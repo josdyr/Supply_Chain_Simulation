@@ -14,7 +14,7 @@ public class ECommerceOntology extends BeanOntology {
 	private ECommerceOntology(String name) {
 		super(name);
 		try {
-			add("set10111.music_shop_ontology.elements");
+			add("supply_chain_simulation_ontology.elements");
 			System.out.println("added the ontologies.");
 		}
 			catch (BeanOntologyException e) {
