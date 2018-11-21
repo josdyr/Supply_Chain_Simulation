@@ -19,10 +19,6 @@ public class Order implements AgentAction {
 	int total_price = (int)quantity * price;
 	int due_in_days = (int)Math.floor(1 + 10 * rand.nextFloat());
 	
-	public Order(PC myPC) {
-		setMyPC(myPC);
-	}
-	
 	public String printOrder() {
 		return "\n" +
 				"\t" + "PC: " + this.myPC.printPC() + "\n" +

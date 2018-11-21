@@ -182,7 +182,9 @@ public class CustomerAgent extends Agent {
 			myPC = new PC();
 			
 			//create random order & print it
-			myOrder = new Order(myPC);
+			myOrder = new Order();
+			myOrder.setMyPC(myPC);
+			
 			System.out.println(
 					"\n" + "    " + "Agent: myCustomerAgent:" +
 					"\n" +"    " + "  " + "myOrder: " + myOrder.printOrder()
@@ -202,13 +204,11 @@ public class CustomerAgent extends Agent {
 		@Override
 		public void action() {
 			
+			// Prepare receiving template
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.addReceiver(myManufacturerAgentAID);
 			msg.setLanguage(codec.getName());
 			msg.setOntology(ontology.getName());
-			
-			myPC = new PC();
-			myOrder = new Order(myPC);
 			
 			// Action Wrapper
 			Action request = new Action();

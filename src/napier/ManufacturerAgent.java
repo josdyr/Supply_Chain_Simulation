@@ -1,5 +1,8 @@
 package napier;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -32,6 +35,8 @@ import supply_chain_simulation_ontology.elements.Track;
 
 public class ManufacturerAgent extends Agent {
 	
+	private HashMap<Integer,Item> itemsForSale = new HashMap<>(); 
+	
 	private int day = 0;
 	private AID tickerAgent;
 	
@@ -40,6 +45,22 @@ public class ManufacturerAgent extends Agent {
 	
 	//This method is called when the agent is launched
 	protected void setup() {
+		
+		// Populate the itemsForSale
+		CD cd = new CD();
+		cd.setName("Synchronicity");
+		cd.setSerialNumber(123);
+		ArrayList<Track> tracks = new ArrayList<Track>();
+		Track t = new Track();
+		t.setName("Every breath you take");
+		t.setDuration(230);
+		tracks.add(t);
+		t = new Track();
+		t.setName("King of pain");
+		t.setDuration(500);
+		tracks.add(t);
+		cd.setTracks(tracks);
+		itemsForSale.put(cd.getSerialNumber(), cd);
 		
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
@@ -144,40 +165,40 @@ public class ManufacturerAgent extends Agent {
 						"\t" + "msg: " + msg.getContent()
 						);
 				
-//				try {
-//					ContentElement ce = null;
-//					System.out.println(msg.getContent()); //print out the message content in SL
-//
-//					// Let JADE convert from String to Java objects
-//					// Output will be a ContentElement
-//					ce = getContentManager().extractContent(msg);
-//					if(ce instanceof Action) {
-//						Concept action = ((Action)ce).getAction();
-//						if (action instanceof Sell) {
-//							Sell order = (Sell)action;
-//							Item it = order.getItem();
-//							// Extract the CD name and print it to demonstrate use of the ontology
-//							if(it instanceof CD){
-//								CD cd = (CD)it;
-//								//check if seller has it in stock
-//								if(itemsForSale.containsKey(cd.getSerialNumber())) {
-//									System.out.println("Selling CD " + cd.getName());
-//								}
-//								else {
-//									System.out.println("You tried to order something out of stock!!!! Check first!");
-//								}
-//
-//							}
-//						}
-//
-//					}
-//				}
-//				catch (CodecException ce) {
-//					ce.printStackTrace();
-//				}
-//				catch (OntologyException oe) {
-//					oe.printStackTrace();
-//				}
+				try {
+					ContentElement ce = null;
+					System.out.println(msg.getContent()); //print out the message content in SL
+
+					// Let JADE convert from String to Java objects
+					// Output will be a ContentElement
+					ce = getContentManager().extractContent(msg);
+					if(ce instanceof Action) {
+						Concept action = ((Action)ce).getAction();
+						if (action instanceof Sell) {
+							Sell order = (Sell)action;
+							Item it = order.getItem();
+							// Extract the CD name and print it to demonstrate use of the ontology
+							if(it instanceof CD){
+								CD cd = (CD)it;
+								//check if seller has it in stock
+								if(itemsForSale.containsKey(cd.getSerialNumber())) {
+									System.out.println("Selling CD " + cd.getName());
+								}
+								else {
+									System.out.println("You tried to order something out of stock!!!! Check first!");
+								}
+
+							}
+						}
+
+					}
+				}
+				catch (CodecException ce) {
+					ce.printStackTrace();
+				}
+				catch (OntologyException oe) {
+					oe.printStackTrace();
+				}
 				
 			}
 			else {
