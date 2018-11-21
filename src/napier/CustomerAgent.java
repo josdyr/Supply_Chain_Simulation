@@ -193,6 +193,8 @@ public class CustomerAgent extends Agent {
 		@Override
 		public void action() {
 			
+			System.out.println("Hello");
+			
 			//send a message to all receiver agents
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 			//add receivers
