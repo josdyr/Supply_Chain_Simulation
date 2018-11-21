@@ -157,17 +157,16 @@ public class ManufacturerAgent extends Agent {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				
-				// = process the message =
-				
-				System.out.println(
-						"\n" + "    " + "Agent: " + myAgent.getLocalName() + "\n" +
-						"\t" + "Message received from " + msg.getSender() + "\n" +
-						"\t" + "msg: " + msg.getContent()
-						);
+				// = Process the message =
 				
 				try {
 					ContentElement ce = null;
-					System.out.println(msg.getContent()); //print out the message content in SL
+					
+					// Print out the message content in SL
+					System.out.println(
+							"\n" + "    " + "Agent: " + myAgent.getLocalName() + "\n" +
+							"\t" + "Message received from " + msg.getSender() + "\n" +
+							"\t" + "Content: " + msg.getContent());
 
 					// Let JADE convert from String to Java objects
 					// Output will be a ContentElement
