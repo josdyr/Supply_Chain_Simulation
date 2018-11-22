@@ -31,6 +31,7 @@ import supply_chain_simulation_ontology.elements.PC;
 public class ManufacturerAgent extends Agent {
 	
 	HashMap<String, Integer> comps_in_demand = new HashMap<>();
+	HashMap<String, Integer> comps_in_stock = new HashMap<>();
 	
 	private AID mySupplierAgentAID;
 	
@@ -167,13 +168,34 @@ public class ManufacturerAgent extends Agent {
 							if(_currentPC instanceof PC){
 								PC currentPC = (PC)_currentPC;
 								
-								System.out.println("    currentPC: " + currentPC.printPC());
+								System.out.println("    currentPC: " + currentPC.printPC() + "\n");
 								
 								// Extract Components, and populate them into the comps_in_demand
+//								comps_in_demand.put(currentPC.getCpu(), 1);
+								addComp(comps_in_demand, currentPC.getCpu());
+								addComp(comps_in_demand, currentPC.getMemory());
+								addComp(comps_in_demand, currentPC.getHarddrive());
+								addComp(comps_in_demand, currentPC.getMotherboard());
+								addComp(comps_in_demand, currentPC.getOs());
+								addComp(comps_in_demand, currentPC.getType());
 								
+//								// Add Screen if type is Laptop
+//								if (currentPC.getType().equals("Laptop")) {
+//									System.out.println("adding screen to list...");
+//								} else {
+//									System.out.println("no screen added...");
+//								}
+								
+								// Print Components in Demand
+								System.out.println("    " + "Components in Demand:");
+								comps_in_demand.forEach((k, v) -> {
+									System.out.format(
+											"    " + "    " + "Comp: %s, amount: %d%n", k, v);
+								});
+								System.out.println(); // New line
 								
 								//check if seller has it in stock
-//								if(itemsForSale.containsKey(cd.getSerialNumber())) {
+//								if(comps_in_stock.containsKey(cd.getSerialNumber())) {
 //									System.out.println("Selling CD " + cd.getName());
 //								}
 //								else {
@@ -260,8 +282,18 @@ public class ManufacturerAgent extends Agent {
 		
 	}
 	
-//	private void addComp(HashMap comps_in_demand, String Comp) {
-//		comps_in_demand.put(Comp, 1);
-//	}
+	private void addComp(HashMap comps_in_demand, String Comp) {
+		
+		Integer value;
+		
+		// If Comp already in list - then just increment the value by 1
+		if (comps_in_demand.containsKey(Comp)) {
+			value = (Integer) comps_in_demand.get(Comp);
+			comps_in_demand.put(Comp, value + 1);
+		} else { // Else add the Comp and the value 1
+			comps_in_demand.put(Comp, 1);
+		}
+		
+	}
 	
 }
