@@ -201,6 +201,15 @@ public class ManufacturerAgent extends Agent {
 //								else {
 //									System.out.println("You tried to order something out of stock!!!! Check first!");
 //								}
+								
+								// Print Components in Demand
+								System.out.println("    " + "Components in Stock:");
+								comps_in_stock.forEach((k, v) -> {
+									System.out.format(
+											"    " + "    " + "Comp: %s, amount: %d%n", k, v);
+								});
+								System.out.println(); // New line
+								
 							}
 						}
 					}
@@ -240,7 +249,7 @@ public class ManufacturerAgent extends Agent {
 				
 				// Action Wrapper
 				Action request = new Action();
-//				request.setAction(myOrder); // send the comps_in_demand map list
+				request.setAction((Concept) comps_in_demand); // send the comps_in_demand map list
 				request.setActor(mySupplierAgentAID);
 				
 				try {
