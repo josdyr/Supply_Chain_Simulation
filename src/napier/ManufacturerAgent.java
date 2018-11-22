@@ -25,17 +25,14 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import supply_chain_simulation_ontology.ECommerceOntology;
-import supply_chain_simulation_ontology.elements.CD;
-import supply_chain_simulation_ontology.elements.Item;
 import supply_chain_simulation_ontology.elements.Order;
-import supply_chain_simulation_ontology.elements.Owns;
 import supply_chain_simulation_ontology.elements.PC;
-import supply_chain_simulation_ontology.elements.Sell;
-import supply_chain_simulation_ontology.elements.Track;
 
 public class ManufacturerAgent extends Agent {
 	
-	private HashMap<Integer,Item> itemsForSale = new HashMap<>(); 
+	HashMap<String, Integer> comps_in_demand = new HashMap<>();
+	
+	private AID mySupplierAgentAID;
 	
 	private int day = 0;
 	private AID tickerAgent;
@@ -46,21 +43,7 @@ public class ManufacturerAgent extends Agent {
 	//This method is called when the agent is launched
 	protected void setup() {
 		
-		// Populate the itemsForSale
-		CD cd = new CD();
-		cd.setName("Synchronicity");
-		cd.setSerialNumber(123);
-		ArrayList<Track> tracks = new ArrayList<Track>();
-		Track t = new Track();
-		t.setName("Every breath you take");
-		t.setDuration(230);
-		tracks.add(t);
-		t = new Track();
-		t.setName("King of pain");
-		t.setDuration(500);
-		tracks.add(t);
-		cd.setTracks(tracks);
-		itemsForSale.put(cd.getSerialNumber(), cd);
+		mySupplierAgentAID = new AID("mySupplierAgent", AID.ISLOCALNAME);
 		
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
@@ -123,6 +106,7 @@ public class ManufacturerAgent extends Agent {
 					
 					//sub-behaviours will execute in the order they are added
 					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
+//					dailyActivity.addSubBehaviour(new SendOrder(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
@@ -182,6 +166,12 @@ public class ManufacturerAgent extends Agent {
 							// Extract the CD name and print it to demonstrate use of the ontology
 							if(_currentPC instanceof PC){
 								PC currentPC = (PC)_currentPC;
+								
+								System.out.println("    currentPC: " + currentPC.printPC());
+								
+								// Extract Components, and populate them into the comps_in_demand
+								
+								
 								//check if seller has it in stock
 //								if(itemsForSale.containsKey(cd.getSerialNumber())) {
 //									System.out.println("Selling CD " + cd.getName());
@@ -210,6 +200,42 @@ public class ManufacturerAgent extends Agent {
 		
 	}
 	
+	//create the SenderBehaviour behaviour
+		public class SendOrder extends OneShotBehaviour {
+			
+			public SendOrder(Agent agent) {
+				super(agent);
+			}
+			
+			@Override
+			public void action() {
+				
+				// Prepare receiving template
+				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+				msg.addReceiver(mySupplierAgentAID);
+				msg.setLanguage(codec.getName());
+				msg.setOntology(ontology.getName());
+				
+				// Action Wrapper
+				Action request = new Action();
+//				request.setAction(myOrder); // send the comps_in_demand map list
+				request.setActor(mySupplierAgentAID);
+				
+				try {
+					getContentManager().fillContent(msg, request);
+					send(msg);
+				}
+				catch (CodecException ce) {
+					ce.printStackTrace();
+				}
+				catch (OntologyException oe) {
+					oe.printStackTrace();
+				}
+				
+			}
+			
+		}
+	
 	public class EndDay extends OneShotBehaviour {
 		
 		public EndDay(Agent a) {
@@ -233,5 +259,9 @@ public class ManufacturerAgent extends Agent {
 		}
 		
 	}
+	
+//	private void addComp(HashMap comps_in_demand, String Comp) {
+//		comps_in_demand.put(Comp, 1);
+//	}
 	
 }

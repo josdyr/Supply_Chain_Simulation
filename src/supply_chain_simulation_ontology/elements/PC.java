@@ -1,5 +1,6 @@
 package supply_chain_simulation_ontology.elements;
 
+import java.util.HashMap;
 import java.util.Random;
 
 import jade.content.Concept;
@@ -7,7 +8,7 @@ import jade.content.onto.annotations.Slot;
 
 public class PC implements Concept {
 	
-Random rand = new Random();
+	Random rand = new Random();
 	
 	// Default is Desktop
 	String type = "Desktop";
