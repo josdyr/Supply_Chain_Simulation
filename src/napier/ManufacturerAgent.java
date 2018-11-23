@@ -3,6 +3,7 @@ package napier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import jade.content.AgentAction;
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -27,8 +28,16 @@ import jade.lang.acl.MessageTemplate;
 import supply_chain_simulation_ontology.ECommerceOntology;
 import supply_chain_simulation_ontology.elements.Order;
 import supply_chain_simulation_ontology.elements.PC;
+import supply_chain_simulation_ontology.elements.SupOrder;
 
 public class ManufacturerAgent extends Agent {
+	
+	SupOrder mySupOrder;
+	
+	private int totalValueOfOrdersShipped;
+	private int penaltyForLateOrders;
+	private int warehouseStorage;
+	private int suppliesPurchased;
 	
 	HashMap<String, Integer> comps_in_demand = new HashMap<>();
 	HashMap<String, Integer> comps_in_stock = new HashMap<>();
@@ -102,12 +111,13 @@ public class ManufacturerAgent extends Agent {
 					day++;
 					System.out.println("    " + getLocalName() + " day: " + day);
 					
+					
 					//spawn new sequential behaviour for day's activities
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					
 					//sub-behaviours will execute in the order they are added
 					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
-//					dailyActivity.addSubBehaviour(new SendOrder(myAgent));
+					dailyActivity.addSubBehaviour(new SendOrder(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
@@ -202,13 +212,17 @@ public class ManufacturerAgent extends Agent {
 //									System.out.println("You tried to order something out of stock!!!! Check first!");
 //								}
 								
-								// Print Components in Demand
+								// Print Components in Stock
 								System.out.println("    " + "Components in Stock:");
 								comps_in_stock.forEach((k, v) -> {
 									System.out.format(
 											"    " + "    " + "Comp: %s, amount: %d%n", k, v);
 								});
 								System.out.println(); // New line
+								
+								// Set the key, values to the SupOrder.comps_in_demand
+								mySupOrder = new SupOrder();
+								mySupOrder.comps_in_demand = (HashMap) comps_in_demand.clone();
 								
 							}
 						}
@@ -249,12 +263,13 @@ public class ManufacturerAgent extends Agent {
 				
 				// Action Wrapper
 				Action request = new Action();
-				request.setAction((Concept) comps_in_demand); // send the comps_in_demand map list
+				request.setAction(mySupOrder);
 				request.setActor(mySupplierAgentAID);
 				
 				try {
 					getContentManager().fillContent(msg, request);
 					send(msg);
+					System.out.println("    message sent...");
 				}
 				catch (CodecException ce) {
 					ce.printStackTrace();

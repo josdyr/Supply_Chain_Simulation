@@ -1,5 +1,7 @@
 package napier;
 
+import java.util.HashMap;
+
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -24,8 +26,11 @@ import napier.ManufacturerAgent.ReceiverBehaviour;
 import supply_chain_simulation_ontology.ECommerceOntology;
 import supply_chain_simulation_ontology.elements.Order;
 import supply_chain_simulation_ontology.elements.PC;
+import supply_chain_simulation_ontology.elements.SupOrder;
 
 public class SupplierAgent extends Agent {
+	
+	HashMap<String, Integer> comps_in_demand = new HashMap<>();
 	
 	private int day = 0;
 	private AID tickerAgent;
@@ -86,7 +91,7 @@ public class SupplierAgent extends Agent {
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					
 					//sub-behaviours will execute in the order they are added
-//					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
+					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
@@ -135,60 +140,25 @@ public class SupplierAgent extends Agent {
 					// Let JADE convert from String to Java objects
 					// Output will be a ContentElement
 					ce = getContentManager().extractContent(msg);
-//					if(ce instanceof Action) {
-//						Concept action = ((Action)ce).getAction();
-//						if (action instanceof Order) {
-//							Order order = (Order)action;
-//							PC _currentPC = order.getMyPC();
-//							// Extract the CD name and print it to demonstrate use of the ontology
-//							if(_currentPC instanceof PC){
-//								PC currentPC = (PC)_currentPC;
-//								
-//								System.out.println("    currentPC: " + currentPC.printPC() + "\n");
-//								
-//								// Extract Components, and populate them into the comps_in_demand
-////									comps_in_demand.put(currentPC.getCpu(), 1);
-//								addComp(comps_in_demand, currentPC.getCpu());
-//								addComp(comps_in_demand, currentPC.getMemory());
-//								addComp(comps_in_demand, currentPC.getHarddrive());
-//								addComp(comps_in_demand, currentPC.getMotherboard());
-//								addComp(comps_in_demand, currentPC.getOs());
-//								addComp(comps_in_demand, currentPC.getType());
-//								
-////									// Add Screen if type is Laptop
-////									if (currentPC.getType().equals("Laptop")) {
-////										System.out.println("adding screen to list...");
-////									} else {
-////										System.out.println("no screen added...");
-////									}
-//								
-//								// Print Components in Demand
-//								System.out.println("    " + "Components in Demand:");
-//								comps_in_demand.forEach((k, v) -> {
-//									System.out.format(
-//											"    " + "    " + "Comp: %s, amount: %d%n", k, v);
-//								});
-//								System.out.println(); // New line
-//								
-//								//check if seller has it in stock
-////									if(comps_in_stock.containsKey(cd.getSerialNumber())) {
-////										System.out.println("Selling CD " + cd.getName());
-////									}
-////									else {
-////										System.out.println("You tried to order something out of stock!!!! Check first!");
-////									}
-//								
-//								// Print Components in Demand
-//								System.out.println("    " + "Components in Stock:");
-//								comps_in_stock.forEach((k, v) -> {
-//									System.out.format(
-//											"    " + "    " + "Comp: %s, amount: %d%n", k, v);
-//								});
-//								System.out.println(); // New line
-//								
-//							}
-//						}
-//					}
+					if(ce instanceof Action) {
+						Concept action = ((Action)ce).getAction();
+						if (action instanceof SupOrder) {
+							SupOrder order = (SupOrder)action;
+							comps_in_demand = order.getComps_in_demand();
+							// Extract the content and demonstrate the use of the ontology
+							System.out.println(
+									"    " + "Agent: " + myAgent.getLocalName() + "\n"
+									+ "    " + "    Extracting Content...");
+							
+							// Print Components in Demand
+							System.out.println("    " + "    " + "Components in Demand:");
+							comps_in_demand.forEach((k, v) -> {
+								System.out.format(
+										"    " + "    " + "Comp: %s, amount: %d%n", k, v);
+							});
+							
+						}
+					}
 				}
 				catch (CodecException ce) {
 					ce.printStackTrace();
@@ -207,7 +177,7 @@ public class SupplierAgent extends Agent {
 		
 	}
 	
-	public class EndDay extends OneShotBehaviour {
+public class EndDay extends OneShotBehaviour {
 		
 		public EndDay(Agent a) {
 			super(a);
@@ -219,14 +189,6 @@ public class SupplierAgent extends Agent {
 			msg.addReceiver(tickerAgent);
 			msg.setContent("done");
 			myAgent.send(msg);
-			
-//			//send a message to each seller that we have finished
-//			ACLMessage buyerDone = new ACLMessage(ACLMessage.INFORM);
-//			buyerDone.setContent("done");
-//			for(AID seller : sellers) {
-//				buyerDone.addReceiver(seller);
-//			}
-//			myAgent.send(buyerDone);
 		}
 		
 	}
