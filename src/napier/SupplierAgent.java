@@ -66,6 +66,15 @@ public class SupplierAgent extends Agent {
 		
 	}
 	
+	//takeDown
+	protected void takeDown() {
+		try {
+			DFService.deregister(this);
+		} catch (FIPAException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public class TickerWaiter extends CyclicBehaviour {
 		
 		//behaviour to wait for a new day
@@ -85,12 +94,12 @@ public class SupplierAgent extends Agent {
 				if(msg.getContent().equals("new day")) {
 					
 					day++;
-					System.out.println("    " + getLocalName() + " day: " + day);
 					
 					//spawn new sequential behaviour for day's activities
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					
 					//sub-behaviours will execute in the order they are added
+					doWait(2000); // Hardcode a timer to wait for the first message
 					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
@@ -121,6 +130,7 @@ public class SupplierAgent extends Agent {
 		
 		@Override
 		public void action() {
+			
 			//try to receive a message
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
 			ACLMessage msg = myAgent.receive(mt);
@@ -145,6 +155,9 @@ public class SupplierAgent extends Agent {
 						if (action instanceof SupOrder) {
 							SupOrder order = (SupOrder)action;
 							comps_in_demand = order.getComps_in_demand();
+							
+							System.out.println(comps_in_demand.size());
+							
 							// Extract the content and demonstrate the use of the ontology
 							System.out.println(
 									"    " + "Agent: " + myAgent.getLocalName() + "\n"
@@ -177,7 +190,7 @@ public class SupplierAgent extends Agent {
 		
 	}
 	
-public class EndDay extends OneShotBehaviour {
+	public class EndDay extends OneShotBehaviour {
 		
 		public EndDay(Agent a) {
 			super(a);

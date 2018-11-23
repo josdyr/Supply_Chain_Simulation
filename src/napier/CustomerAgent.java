@@ -49,10 +49,13 @@ public class CustomerAgent extends Agent {
 	//This method is called when the agent is launched
 	protected void setup() {
 		
-		myManufacturerAgentAID = new AID("myManufacturerAgent", AID.ISLOCALNAME);
-		
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
+		
+		// Print out a welcome message
+		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
+		
+		myManufacturerAgentAID = new AID("myManufacturerAgent", AID.ISLOCALNAME);
 		
 		//add this agent to the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -70,9 +73,6 @@ public class CustomerAgent extends Agent {
 		}
 		
 		addBehaviour(new TickerWaiter(this));
-		
-		// Print out a welcome message
-		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
 		
 	}
 	
@@ -104,7 +104,6 @@ public class CustomerAgent extends Agent {
 				if(msg.getContent().equals("new day")) {
 					
 					day++;
-					System.out.println("    " + getLocalName() + " day: " + day);
 					
 					//spawn new sequential behaviour for day's activities
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
@@ -181,7 +180,7 @@ public class CustomerAgent extends Agent {
 			myOrder.setMyPC(myPC);
 			
 			System.out.println(
-					"\n" + "    " + "Agent: myCustomerAgent:" +
+					"    " + "Agent: myCustomerAgent:" +
 					"\n" +"    " + "  " + "myOrder: " + myOrder.printOrder()
 					);
 			
@@ -236,6 +235,7 @@ public class CustomerAgent extends Agent {
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(tickerAgent);
 			msg.setContent("done");
+			doWait(3000);
 			myAgent.send(msg);
 			
 //			//send a message to each seller that we have finished

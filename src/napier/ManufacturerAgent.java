@@ -53,13 +53,13 @@ public class ManufacturerAgent extends Agent {
 	//This method is called when the agent is launched
 	protected void setup() {
 		
-		mySupplierAgentAID = new AID("mySupplierAgent", AID.ISLOCALNAME);
-		
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		
 		// Print out a welcome message
 		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
+		
+		mySupplierAgentAID = new AID("mySupplierAgent", AID.ISLOCALNAME);
 		
 		//add this agent to the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -109,8 +109,6 @@ public class ManufacturerAgent extends Agent {
 				if(msg.getContent().equals("new day")) {
 					
 					day++;
-					System.out.println("    " + getLocalName() + " day: " + day);
-					
 					
 					//spawn new sequential behaviour for day's activities
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
@@ -127,7 +125,7 @@ public class ManufacturerAgent extends Agent {
 					// ...
 					
 					// Wait a bit only the first day in order to receive the first message
-					doWait(3000);
+					doWait(1000);
 					
 				}
 				else {
@@ -178,7 +176,7 @@ public class ManufacturerAgent extends Agent {
 							if(_currentPC instanceof PC){
 								PC currentPC = (PC)_currentPC;
 								
-								System.out.println("    currentPC: " + currentPC.printPC() + "\n");
+								System.out.println("    " + "    " + "currentPC: " + currentPC.printPC() + "\n");
 								
 								// Extract Components, and populate them into the comps_in_demand
 //								comps_in_demand.put(currentPC.getCpu(), 1);
@@ -197,10 +195,10 @@ public class ManufacturerAgent extends Agent {
 //								}
 								
 								// Print Components in Demand
-								System.out.println("    " + "Components in Demand:");
+								System.out.println("    " + "    " + "Components in Demand:");
 								comps_in_demand.forEach((k, v) -> {
 									System.out.format(
-											"    " + "    " + "Comp: %s, amount: %d%n", k, v);
+											"    " + "    " + "    " + "Comp: %s, amount: %d%n", k, v);
 								});
 								System.out.println(); // New line
 								
@@ -213,16 +211,18 @@ public class ManufacturerAgent extends Agent {
 //								}
 								
 								// Print Components in Stock
-								System.out.println("    " + "Components in Stock:");
+								System.out.println("    " + "    " + "Components in Stock:");
 								comps_in_stock.forEach((k, v) -> {
 									System.out.format(
-											"    " + "    " + "Comp: %s, amount: %d%n", k, v);
+											"    " + "    " + "    " + "Comp: %s, amount: %d%n", k, v);
 								});
 								System.out.println(); // New line
 								
 								// Set the key, values to the SupOrder.comps_in_demand
 								mySupOrder = new SupOrder();
 								mySupOrder.comps_in_demand = (HashMap) comps_in_demand.clone();
+								System.out.println("Debug: " + "mySupOrder.comps_in_demand: " + mySupOrder.comps_in_demand);
+								System.out.println("Debug: " + "mySupOrder.comps_in_demand.size(): " + mySupOrder.comps_in_demand.size());
 								
 							}
 						}
@@ -269,7 +269,12 @@ public class ManufacturerAgent extends Agent {
 				try {
 					getContentManager().fillContent(msg, request);
 					send(msg);
-					System.out.println("    message sent...");
+					
+					System.out.println("mySupOrder.comps_in_demand.size(): " + mySupOrder.comps_in_demand.size());
+					
+					System.out.println(
+							"    " + "Agent: " + myAgent.getLocalName() + "\n"
+							+ "    " + "    Message sent to " + mySupplierAgentAID.getLocalName() + "\n");
 				}
 				catch (CodecException ce) {
 					ce.printStackTrace();
