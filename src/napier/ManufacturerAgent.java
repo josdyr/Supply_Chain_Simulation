@@ -1,7 +1,11 @@
 package napier;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+//import java.util.HashMap;
+//import jade.util.leap.HashMap;
 
 import jade.content.AgentAction;
 import jade.content.Concept;
@@ -30,6 +34,8 @@ import supply_chain_simulation_ontology.elements.Order;
 import supply_chain_simulation_ontology.elements.PC;
 import supply_chain_simulation_ontology.elements.SupOrder;
 
+import napier.MyEntry;
+
 public class ManufacturerAgent extends Agent {
 	
 	SupOrder mySupOrder;
@@ -39,8 +45,12 @@ public class ManufacturerAgent extends Agent {
 	private int warehouseStorage;
 	private int suppliesPurchased;
 	
-	HashMap<String, Integer> comps_in_demand = new HashMap<>();
-	HashMap<String, Integer> comps_in_stock = new HashMap<>();
+//	HashMap<String, Integer> comps_in_demand = new HashMap<>();
+//	HashMap<String, Integer> comps_in_stock = new HashMap<>();
+	
+	List<Map.Entry<String, Integer>> comps_in_demand = new ArrayList<Map.Entry<String, Integer>>(7);
+	
+	
 	
 	private AID mySupplierAgentAID;
 	
@@ -173,56 +183,23 @@ public class ManufacturerAgent extends Agent {
 							Order order = (Order)action;
 							PC _currentPC = order.getMyPC();
 							// Extract the CD name and print it to demonstrate use of the ontology
-							if(_currentPC instanceof PC){
+							if(_currentPC instanceof PC) {
 								PC currentPC = (PC)_currentPC;
 								
-								System.out.println("    " + "    " + "currentPC: " + currentPC.printPC() + "\n");
-								
 								// Extract Components, and populate them into the comps_in_demand
-//								comps_in_demand.put(currentPC.getCpu(), 1);
-								addComp(comps_in_demand, currentPC.getCpu());
-								addComp(comps_in_demand, currentPC.getMemory());
-								addComp(comps_in_demand, currentPC.getHarddrive());
-								addComp(comps_in_demand, currentPC.getMotherboard());
-								addComp(comps_in_demand, currentPC.getOs());
-								addComp(comps_in_demand, currentPC.getType());
+//								currentPC.getCpu();
+//								comps_in_demand.add(new Map.Entry<String, Integer>("S", 1));
 								
-//								// Add Screen if type is Laptop
-//								if (currentPC.getType().equals("Laptop")) {
-//									System.out.println("adding screen to list...");
-//								} else {
-//									System.out.println("no screen added...");
-//								}
 								
-								// Print Components in Demand
-								System.out.println("    " + "    " + "Components in Demand:");
-								comps_in_demand.forEach((k, v) -> {
-									System.out.format(
-											"    " + "    " + "    " + "Comp: %s, amount: %d%n", k, v);
-								});
-								System.out.println(); // New line
 								
-								//check if seller has it in stock
-//								if(comps_in_stock.containsKey(cd.getSerialNumber())) {
-//									System.out.println("Selling CD " + cd.getName());
-//								}
-//								else {
-//									System.out.println("You tried to order something out of stock!!!! Check first!");
-//								}
 								
-								// Print Components in Stock
-								System.out.println("    " + "    " + "Components in Stock:");
-								comps_in_stock.forEach((k, v) -> {
-									System.out.format(
-											"    " + "    " + "    " + "Comp: %s, amount: %d%n", k, v);
-								});
-								System.out.println(); // New line
+//								addComp(comps_in_demand, currentPC.getCpu());
+//								addComp(comps_in_demand, currentPC.getMemory());
+//								addComp(comps_in_demand, currentPC.getHarddrive());
+//								addComp(comps_in_demand, currentPC.getMotherboard());
+//								addComp(comps_in_demand, currentPC.getOs());
 								
-								// Set the key, values to the SupOrder.comps_in_demand
-								mySupOrder = new SupOrder();
-								mySupOrder.comps_in_demand = (HashMap) comps_in_demand.clone();
-								System.out.println("Debug: " + "mySupOrder.comps_in_demand: " + mySupOrder.comps_in_demand);
-								System.out.println("Debug: " + "mySupOrder.comps_in_demand.size(): " + mySupOrder.comps_in_demand.size());
+								
 								
 							}
 						}
@@ -311,18 +288,18 @@ public class ManufacturerAgent extends Agent {
 		
 	}
 	
-	private void addComp(HashMap comps_in_demand, String Comp) {
-		
-		Integer value;
-		
-		// If Comp already in list - then just increment the value by 1
-		if (comps_in_demand.containsKey(Comp)) {
-			value = (Integer) comps_in_demand.get(Comp);
-			comps_in_demand.put(Comp, value + 1);
-		} else { // Else add the Comp and the value 1
-			comps_in_demand.put(Comp, 1);
-		}
-		
-	}
+//	private void addComp(List<Map.Entry<String, Integer>> comps_in_demand, String Comp) {
+//		
+//		Integer value;
+//		
+//		// If Comp already in list - then just increment the value by 1
+//		if (comps_in_demand.contains(o)) {
+//			value = (Integer) comps_in_demand.get(Comp);
+//			comps_in_demand.put(Comp, value + 1);
+//		} else { // Else add the Comp and the value 1
+//			comps_in_demand.put(Comp, 1);
+//		}
+//		
+//	}
 	
 }

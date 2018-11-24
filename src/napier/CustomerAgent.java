@@ -1,6 +1,7 @@
 package napier;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.CodecException;
@@ -21,6 +22,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import supply_chain_simulation_ontology.ECommerceOntology;
+import supply_chain_simulation_ontology.elements.Desktop;
+import supply_chain_simulation_ontology.elements.Laptop;
 import supply_chain_simulation_ontology.elements.Order;
 import supply_chain_simulation_ontology.elements.PC;
 
