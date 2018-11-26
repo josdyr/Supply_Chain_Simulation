@@ -3,8 +3,7 @@ package napier;
 import java.util.Map;
 
 final class MyEntry<K, V> implements Map.Entry<K, V> {
-    
-	private final K key;
+    private final K key;
     private V value;
 
     public MyEntry(K key, V value) {
@@ -28,5 +27,4 @@ final class MyEntry<K, V> implements Map.Entry<K, V> {
         this.value = value;
         return old;
     }
-    
 }

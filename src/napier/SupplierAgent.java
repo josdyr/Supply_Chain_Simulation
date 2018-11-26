@@ -1,6 +1,9 @@
 package napier;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -30,7 +33,7 @@ import supply_chain_simulation_ontology.elements.SupOrder;
 
 public class SupplierAgent extends Agent {
 	
-	HashMap<String, Integer> comps_in_demand = new HashMap<>();
+	List<Map.Entry<String, Integer>> comps_in_demand = new ArrayList<Map.Entry<String, Integer>>();
 	
 	private int day = 0;
 	private AID tickerAgent;
@@ -153,9 +156,11 @@ public class SupplierAgent extends Agent {
 					if(ce instanceof Action) {
 						Concept action = ((Action)ce).getAction();
 						if (action instanceof SupOrder) {
-							SupOrder order = (SupOrder)action;
-							comps_in_demand = order.getComps_in_demand();
+							SupOrder sup_order = (SupOrder)action;
+							comps_in_demand = sup_order.comps_in_demand;
 							
+							System.out.println(sup_order.getComps_in_demand().size());
+							System.out.println(sup_order.getComps_in_demand().get(1));
 							System.out.println(comps_in_demand.size());
 							
 							// Extract the content and demonstrate the use of the ontology
@@ -164,11 +169,11 @@ public class SupplierAgent extends Agent {
 									+ "    " + "    Extracting Content...");
 							
 							// Print Components in Demand
-							System.out.println("    " + "    " + "Components in Demand:");
-							comps_in_demand.forEach((k, v) -> {
-								System.out.format(
-										"    " + "    " + "Comp: %s, amount: %d%n", k, v);
-							});
+//							System.out.println("    " + "    " + "Components in Demand:");
+//							comps_in_demand.forEach((k, v) -> {
+//								System.out.format(
+//										"    " + "    " + "Comp: %s, amount: %d%n", k, v);
+//							});
 							
 						}
 					}

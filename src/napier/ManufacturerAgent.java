@@ -2,6 +2,7 @@ package napier;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 //import java.util.HashMap;
@@ -45,10 +46,7 @@ public class ManufacturerAgent extends Agent {
 	private int warehouseStorage;
 	private int suppliesPurchased;
 	
-//	HashMap<String, Integer> comps_in_demand = new HashMap<>();
-//	HashMap<String, Integer> comps_in_stock = new HashMap<>();
-	
-	List<Map.Entry<String, Integer>> comps_in_demand = new ArrayList<Map.Entry<String, Integer>>(7);
+	List<Map.Entry<String, Integer>> comps_in_demand = new ArrayList<Map.Entry<String, Integer>>();
 	
 	
 	
@@ -186,20 +184,16 @@ public class ManufacturerAgent extends Agent {
 							if(_currentPC instanceof PC) {
 								PC currentPC = (PC)_currentPC;
 								
+								int quantity = 1;
+								
+								mySupOrder = new SupOrder();
+								
 								// Extract Components, and populate them into the comps_in_demand
-//								currentPC.getCpu();
-//								comps_in_demand.add(new Map.Entry<String, Integer>("S", 1));
-								
-								
-								
-								
-//								addComp(comps_in_demand, currentPC.getCpu());
-//								addComp(comps_in_demand, currentPC.getMemory());
-//								addComp(comps_in_demand, currentPC.getHarddrive());
-//								addComp(comps_in_demand, currentPC.getMotherboard());
-//								addComp(comps_in_demand, currentPC.getOs());
-								
-								
+								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getCpu(), quantity));
+								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getHarddrive(), quantity));
+								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getMemory(), quantity));
+								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getMotherboard(), quantity));
+								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getOs(), quantity));
 								
 							}
 						}
@@ -288,12 +282,12 @@ public class ManufacturerAgent extends Agent {
 		
 	}
 	
-//	private void addComp(List<Map.Entry<String, Integer>> comps_in_demand, String Comp) {
+//	private void addComp(List comps_in_demand, String Comp) {
 //		
 //		Integer value;
 //		
-//		// If Comp already in list - then just increment the value by 1
-//		if (comps_in_demand.contains(o)) {
+//		// If Comp already in list, then just increment the value by 1 - Otherwise, add the comp and amount=1
+//		if (comps_in_demand.containsKey(Comp)) {
 //			value = (Integer) comps_in_demand.get(Comp);
 //			comps_in_demand.put(Comp, value + 1);
 //		} else { // Else add the Comp and the value 1
