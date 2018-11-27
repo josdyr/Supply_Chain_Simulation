@@ -6,17 +6,18 @@ import java.util.List;
 import java.util.Map;
 
 import jade.content.AgentAction;
+import jade.content.Concept;
 
-public class SupOrder implements AgentAction {
+public class SupOrder implements Concept {
 	
-	public List<Map.Entry<String, Integer>> comps_in_demand = new ArrayList<Map.Entry<String, Integer>>();
+	private ArrayList<Comp> components_in_demand = new ArrayList<>();
 
-	public List<Map.Entry<String, Integer>> getComps_in_demand() {
-		return comps_in_demand;
+	public ArrayList<Comp> getComponents_in_demand() {
+		return components_in_demand;
 	}
 
-	public void setComps_in_demand(List<Map.Entry<String, Integer>> comps_in_demand) {
-		this.comps_in_demand = comps_in_demand;
+	public void setComponents_in_demand(ArrayList<Comp> components_in_demand) {
+		this.components_in_demand = components_in_demand;
 	}
 	
 }

@@ -37,6 +37,7 @@ public class SynchTickerAgent extends Agent {
 		// Make sure all agents have started
 		System.out.println("Waiting to make sure all agents get enrolled...");
 		doWait(2000);
+//		doWait(20000);
 		
 		System.out.println("\n\n" + "=== Starting simulation ===" + "\n");
 		

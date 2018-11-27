@@ -10,6 +10,8 @@ public class PC implements Concept {
 	
 	Random rand = new Random();
 	
+	ArrayList<Comp> 
+	
 	// Default is Desktop
 	String type = "Desktop";
 	Boolean screen = false;

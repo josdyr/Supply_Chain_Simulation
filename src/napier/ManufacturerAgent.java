@@ -1,5 +1,6 @@
 package napier;
 
+import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import supply_chain_simulation_ontology.ECommerceOntology;
 import supply_chain_simulation_ontology.elements.Order;
 import supply_chain_simulation_ontology.elements.PC;
 import supply_chain_simulation_ontology.elements.SupOrder;
+import supply_chain_simulation_ontology.elements.Comp;
 
 import napier.MyEntry;
 
@@ -46,9 +48,7 @@ public class ManufacturerAgent extends Agent {
 	private int warehouseStorage;
 	private int suppliesPurchased;
 	
-	List<Map.Entry<String, Integer>> comps_in_demand = new ArrayList<Map.Entry<String, Integer>>();
-	
-	
+	ArrayList<Comp> components_in_demand = new ArrayList<>();
 	
 	private AID mySupplierAgentAID;
 	
@@ -184,16 +184,17 @@ public class ManufacturerAgent extends Agent {
 							if(_currentPC instanceof PC) {
 								PC currentPC = (PC)_currentPC;
 								
-								int quantity = 1;
-								
 								mySupOrder = new SupOrder();
 								
-								// Extract Components, and populate them into the comps_in_demand
-								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getCpu(), quantity));
-								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getHarddrive(), quantity));
-								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getMemory(), quantity));
-								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getMotherboard(), quantity));
-								mySupOrder.comps_in_demand.add(new AbstractMap.SimpleEntry<String, Integer>(currentPC.getOs(), quantity));
+								// Make 6 new components
+								components_in_demand.add(new Comp(currentPC.getCpu(), 1));
+								components_in_demand.add(new Comp(currentPC.getHarddrive(), 1));
+								components_in_demand.add(new Comp(currentPC.getMemory(), 1));
+								components_in_demand.add(new Comp(currentPC.getMotherboard(), 1));
+								components_in_demand.add(new Comp(currentPC.getOs(), 1));
+								components_in_demand.add(new Comp(currentPC.getType(), 1));
+								
+								mySupOrder.setComponents_in_demand(components_in_demand);
 								
 							}
 						}
@@ -240,8 +241,6 @@ public class ManufacturerAgent extends Agent {
 				try {
 					getContentManager().fillContent(msg, request);
 					send(msg);
-					
-					System.out.println("mySupOrder.comps_in_demand.size(): " + mySupOrder.comps_in_demand.size());
 					
 					System.out.println(
 							"    " + "Agent: " + myAgent.getLocalName() + "\n"

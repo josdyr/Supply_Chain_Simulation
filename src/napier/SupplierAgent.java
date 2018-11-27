@@ -27,13 +27,14 @@ import jade.lang.acl.MessageTemplate;
 import napier.ManufacturerAgent.EndDay;
 import napier.ManufacturerAgent.ReceiverBehaviour;
 import supply_chain_simulation_ontology.ECommerceOntology;
+import supply_chain_simulation_ontology.elements.Comp;
 import supply_chain_simulation_ontology.elements.Order;
 import supply_chain_simulation_ontology.elements.PC;
 import supply_chain_simulation_ontology.elements.SupOrder;
 
 public class SupplierAgent extends Agent {
 	
-	List<Map.Entry<String, Integer>> comps_in_demand = new ArrayList<Map.Entry<String, Integer>>();
+	ArrayList<Comp> components_in_demand = new ArrayList<>();
 	
 	private int day = 0;
 	private AID tickerAgent;
@@ -157,11 +158,11 @@ public class SupplierAgent extends Agent {
 						Concept action = ((Action)ce).getAction();
 						if (action instanceof SupOrder) {
 							SupOrder sup_order = (SupOrder)action;
-							comps_in_demand = sup_order.comps_in_demand;
+							components_in_demand = sup_order.getComponents_in_demand();
 							
-							System.out.println(sup_order.getComps_in_demand().size());
-							System.out.println(sup_order.getComps_in_demand().get(1));
-							System.out.println(comps_in_demand.size());
+							System.out.println(sup_order.getComponents_in_demand().size());
+							System.out.println(sup_order.getComponents_in_demand().get(0));
+							System.out.println(components_in_demand.size());
 							
 							// Extract the content and demonstrate the use of the ontology
 							System.out.println(
@@ -169,11 +170,9 @@ public class SupplierAgent extends Agent {
 									+ "    " + "    Extracting Content...");
 							
 							// Print Components in Demand
-//							System.out.println("    " + "    " + "Components in Demand:");
-//							comps_in_demand.forEach((k, v) -> {
-//								System.out.format(
-//										"    " + "    " + "Comp: %s, amount: %d%n", k, v);
-//							});
+							for (int i = 0; i < components_in_demand.size(); i++) {
+								System.out.println("comp_" + i + " being ordered: " + components_in_demand.get(i).toString());
+							}
 							
 						}
 					}
