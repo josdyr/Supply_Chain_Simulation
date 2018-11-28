@@ -27,10 +27,10 @@ import jade.lang.acl.MessageTemplate;
 import napier.ManufacturerAgent.EndDay;
 import napier.ManufacturerAgent.ReceiverBehaviour;
 import supply_chain_simulation_ontology.ECommerceOntology;
-import supply_chain_simulation_ontology.elements.Comp;
-import supply_chain_simulation_ontology.elements.Order;
-import supply_chain_simulation_ontology.elements.PC;
-import supply_chain_simulation_ontology.elements.SupOrder;
+import supply_chain_simulation_ontology.elements.concepts.Comp;
+import supply_chain_simulation_ontology.elements.concepts.Order;
+import supply_chain_simulation_ontology.elements.concepts.PC;
+import supply_chain_simulation_ontology.elements.concepts.SupOrder;
 
 public class SupplierAgent extends Agent {
 	

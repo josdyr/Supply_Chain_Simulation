@@ -22,10 +22,19 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import supply_chain_simulation_ontology.ECommerceOntology;
-import supply_chain_simulation_ontology.elements.Desktop;
-import supply_chain_simulation_ontology.elements.Laptop;
-import supply_chain_simulation_ontology.elements.Order;
-import supply_chain_simulation_ontology.elements.PC;
+import supply_chain_simulation_ontology.elements.concepts.Comp;
+import supply_chain_simulation_ontology.elements.concepts.Desktop;
+import supply_chain_simulation_ontology.elements.concepts.Laptop;
+import supply_chain_simulation_ontology.elements.concepts.Order;
+import supply_chain_simulation_ontology.elements.concepts.PC;
+import supply_chain_simulation_ontology.elements.concepts.comps.cpu.Desktop_CPU;
+import supply_chain_simulation_ontology.elements.concepts.comps.cpu.Laptop_CPU;
+import supply_chain_simulation_ontology.elements.concepts.comps.harddrive.HDD_1Tb;
+import supply_chain_simulation_ontology.elements.concepts.comps.harddrive.HDD_2Tb;
+import supply_chain_simulation_ontology.elements.concepts.comps.memory.RAM_16Gb;
+import supply_chain_simulation_ontology.elements.concepts.comps.memory.RAM_8Gb;
+import supply_chain_simulation_ontology.elements.concepts.comps.os.OS_Linux;
+import supply_chain_simulation_ontology.elements.concepts.comps.os.OS_Windows;
 
 public class CustomerAgent extends Agent {
 	
@@ -168,6 +177,8 @@ public class CustomerAgent extends Agent {
 	
 	public class GenerateOrder extends OneShotBehaviour {
 		
+		Random rand = new Random();
+		
 		public GenerateOrder(Agent agent) {
 			super(agent);
 		}
@@ -175,8 +186,29 @@ public class CustomerAgent extends Agent {
 		@Override
 		public void action() {
 			
-			//create random PCs
-			myPC = new PC();
+			// Generate either Laptop or Desktop
+			if (rand.nextFloat() > 0.5f) {
+				Laptop myPC = new Laptop();
+			} else {
+				Desktop myPC = new Desktop();
+			}
+			
+			// Set Custom Components
+			if (rand.nextFloat() > 0.5f) {
+				myPC.appendComp(new RAM_8Gb());
+			} else {
+				myPC.appendComp(new RAM_16Gb());
+			}
+			if (rand.nextFloat() > 0.5f) {
+				myPC.appendComp(new HDD_1Tb());
+			} else {
+				myPC.appendComp(new HDD_2Tb());
+			}
+			if (rand.nextFloat() > 0.5f) {
+				myPC.appendComp(new OS_Windows());
+			} else {
+				myPC.appendComp(new OS_Linux());
+			}
 			
 			//create random order & print it
 			myOrder = new Order();
@@ -184,7 +216,7 @@ public class CustomerAgent extends Agent {
 			
 			System.out.println(
 					"    " + "Agent: myCustomerAgent:" +
-					"\n" +"    " + "  " + "myOrder: " + myOrder.printOrder()
+					"\n" +"    " + "  " + "myOrder: " + myOrder.toString()
 					);
 			
 		}

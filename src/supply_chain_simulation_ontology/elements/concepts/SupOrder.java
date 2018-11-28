@@ -1,4 +1,4 @@
-package supply_chain_simulation_ontology.elements;
+package supply_chain_simulation_ontology.elements.concepts;
 
 import java.util.ArrayList;
 import java.util.HashMap;

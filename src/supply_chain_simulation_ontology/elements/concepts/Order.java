@@ -1,4 +1,4 @@
-package supply_chain_simulation_ontology.elements;
+package supply_chain_simulation_ontology.elements.concepts;
 
 import java.lang.*;
 import java.util.Random;
@@ -19,13 +19,19 @@ public class Order implements AgentAction {
 	int total_price = (int)quantity * price;
 	int due_in_days = (int)Math.floor(1 + 10 * rand.nextFloat());
 	
-	public String printOrder() {
-		return "\n" +
-				"\t" + "PC: " + this.myPC.printPC() + "\n" +
-				"\t" + "quantity: " + this.quantity + "\n" +
-				"\t" + "price: " + this.price + "\n" +
-				"\t" + "total_price: " + this.total_price + "\n" +
-				"\t" + "due_in_days: " + this.due_in_days + "\n";
+//	public String printOrder() {
+//		return "\n" +
+//				"\t" + "PC: " + this.myPC.toString() + "\n" +
+//				"\t" + "quantity: " + this.quantity + "\n" +
+//				"\t" + "price: " + this.price + "\n" +
+//				"\t" + "total_price: " + this.total_price + "\n" +
+//				"\t" + "due_in_days: " + this.due_in_days + "\n";
+//	}
+	
+	@Override
+	public String toString() {
+		return "Order [buyer=" + buyer + ", myPC=" + myPC.toString() + ", quantity=" + quantity + ", price=" + price
+				+ ", total_price=" + total_price + ", due_in_days=" + due_in_days + "]";
 	}
 	
 	// Getters and Setters

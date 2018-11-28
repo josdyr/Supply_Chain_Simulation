@@ -1,1 +1,1 @@
-http://ME0B056-01601C.c27-merch.napier.ac.uk:7778/acc
+http://192.168.0.51:7778/acc
