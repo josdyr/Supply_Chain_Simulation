@@ -7,27 +7,18 @@ import jade.content.AgentAction;
 import jade.content.Concept;
 import jade.core.AID;
 
-public class Order implements AgentAction {
-	
-	Random rand = new Random();
+public class Order implements Concept {
 	
 	private AID buyer;
+	private AID seller;
+
 	private PC myPC;
 	
-	int quantity = (int)Math.floor(1 + 50 * rand.nextFloat());
-	int price = (int)Math.floor(600 + 200 * rand.nextFloat());
-	int total_price = (int)quantity * price;
-	int due_in_days = (int)Math.floor(1 + 10 * rand.nextFloat());
-	
-//	public String printOrder() {
-//		return "\n" +
-//				"\t" + "PC: " + this.myPC.toString() + "\n" +
-//				"\t" + "quantity: " + this.quantity + "\n" +
-//				"\t" + "price: " + this.price + "\n" +
-//				"\t" + "total_price: " + this.total_price + "\n" +
-//				"\t" + "due_in_days: " + this.due_in_days + "\n";
-//	}
-	
+	int quantity;
+	int price;
+	int total_price;
+	int due_in_days;
+
 	@Override
 	public String toString() {
 		return "Order [buyer=" + buyer + ", myPC=" + myPC.toString() + ", quantity=" + quantity + ", price=" + price
@@ -41,6 +32,14 @@ public class Order implements AgentAction {
 
 	public void setBuyer(AID buyer) {
 		this.buyer = buyer;
+	}
+	
+	public AID getSeller() {
+		return seller;
+	}
+
+	public void setSeller(AID seller) {
+		this.seller = seller;
 	}
 
 	public PC getMyPC() {

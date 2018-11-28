@@ -2,12 +2,12 @@ package supply_chain_simulation_ontology.elements.concepts;
 
 import java.util.ArrayList;
 
-import supply_chain_simulation_ontology.elements.concepts.comps.cpu.Desktop_CPU;
-import supply_chain_simulation_ontology.elements.concepts.comps.motherboard.Desktop_Motherboard;
+import supply_chain_simulation_ontology.elements.concepts.comps.Desktop_CPU;
+import supply_chain_simulation_ontology.elements.concepts.comps.Desktop_Motherboard;
 
 public class Desktop extends PC {
 	
-public ArrayList<Comp> pc_components = new ArrayList<>();
+public ArrayList<Comp> pc_components = new ArrayList<Comp>();
 	
 	// Constructor
 	public Desktop() {

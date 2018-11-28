@@ -14,7 +14,6 @@ import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
-import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -22,19 +21,17 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import supply_chain_simulation_ontology.ECommerceOntology;
-import supply_chain_simulation_ontology.elements.concepts.Comp;
+import supply_chain_simulation_ontology.elements.actions.Buy;
 import supply_chain_simulation_ontology.elements.concepts.Desktop;
 import supply_chain_simulation_ontology.elements.concepts.Laptop;
 import supply_chain_simulation_ontology.elements.concepts.Order;
 import supply_chain_simulation_ontology.elements.concepts.PC;
-import supply_chain_simulation_ontology.elements.concepts.comps.cpu.Desktop_CPU;
-import supply_chain_simulation_ontology.elements.concepts.comps.cpu.Laptop_CPU;
-import supply_chain_simulation_ontology.elements.concepts.comps.harddrive.HDD_1Tb;
-import supply_chain_simulation_ontology.elements.concepts.comps.harddrive.HDD_2Tb;
-import supply_chain_simulation_ontology.elements.concepts.comps.memory.RAM_16Gb;
-import supply_chain_simulation_ontology.elements.concepts.comps.memory.RAM_8Gb;
-import supply_chain_simulation_ontology.elements.concepts.comps.os.OS_Linux;
-import supply_chain_simulation_ontology.elements.concepts.comps.os.OS_Windows;
+import supply_chain_simulation_ontology.elements.concepts.comps.HDD_1Tb;
+import supply_chain_simulation_ontology.elements.concepts.comps.HDD_2Tb;
+import supply_chain_simulation_ontology.elements.concepts.comps.OS_Linux;
+import supply_chain_simulation_ontology.elements.concepts.comps.OS_Windows;
+import supply_chain_simulation_ontology.elements.concepts.comps.RAM_16Gb;
+import supply_chain_simulation_ontology.elements.concepts.comps.RAM_8Gb;
 
 public class CustomerAgent extends Agent {
 	
@@ -42,6 +39,7 @@ public class CustomerAgent extends Agent {
 	
 	PC myPC;
 	Order myOrder;
+	Buy buy;
 	
 	private int day = 0;
 	private AID tickerAgent;
@@ -188,9 +186,9 @@ public class CustomerAgent extends Agent {
 			
 			// Generate either Laptop or Desktop
 			if (rand.nextFloat() > 0.5f) {
-				Laptop myPC = new Laptop();
+				myPC = new Laptop();
 			} else {
-				Desktop myPC = new Desktop();
+				myPC = new Desktop();
 			}
 			
 			// Set Custom Components
@@ -213,6 +211,11 @@ public class CustomerAgent extends Agent {
 			//create random order & print it
 			myOrder = new Order();
 			myOrder.setMyPC(myPC);
+			myOrder.setBuyer(myAgent.getAID());
+			myOrder.setQuantity((int)Math.floor(1 + 50 * rand.nextFloat()));
+			myOrder.setPrice((int)Math.floor(600 + 200 * rand.nextFloat()));
+			myOrder.setTotal_price((int)Math.floor(600 + 200 * rand.nextFloat()));
+			myOrder.setDue_in_days((int)Math.floor(1 + 10 * rand.nextFloat()));
 			
 			System.out.println(
 					"    " + "Agent: myCustomerAgent:" +
@@ -241,12 +244,16 @@ public class CustomerAgent extends Agent {
 			
 			// Action Wrapper
 			Action request = new Action();
-			request.setAction(myOrder);
+//			request.setAction(myOrder);
+			buy = new Buy();
+			buy.setOrder(myOrder);
+			request.setAction(buy);
 			request.setActor(myManufacturerAgentAID);
 			
 			try {
 				getContentManager().fillContent(msg, request);
 				send(msg);
+				System.out.println("      " + "Custumer sent order." + "\n");
 			}
 			catch (CodecException ce) {
 				ce.printStackTrace();

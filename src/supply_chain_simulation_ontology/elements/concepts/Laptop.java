@@ -2,13 +2,13 @@ package supply_chain_simulation_ontology.elements.concepts;
 
 import java.util.ArrayList;
 
-import supply_chain_simulation_ontology.elements.concepts.comps.cpu.Laptop_CPU;
-import supply_chain_simulation_ontology.elements.concepts.comps.motherboard.Laptop_Motherboard;
-import supply_chain_simulation_ontology.elements.concepts.comps.screen.Screen;
+import supply_chain_simulation_ontology.elements.concepts.comps.Laptop_CPU;
+import supply_chain_simulation_ontology.elements.concepts.comps.Laptop_Motherboard;
+import supply_chain_simulation_ontology.elements.concepts.comps.Screen;
 
 public class Laptop extends PC {
 	
-	public ArrayList<Comp> pc_components = new ArrayList<>();
+	private ArrayList<Comp> pc_components = new ArrayList<Comp>();
 	
 	// Constructor
 	public Laptop() {

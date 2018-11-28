@@ -32,15 +32,16 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import supply_chain_simulation_ontology.ECommerceOntology;
+import supply_chain_simulation_ontology.elements.actions.Buy;
 import supply_chain_simulation_ontology.elements.concepts.Comp;
 import supply_chain_simulation_ontology.elements.concepts.Order;
 import supply_chain_simulation_ontology.elements.concepts.PC;
 import supply_chain_simulation_ontology.elements.concepts.SupOrder;
-import napier.MyEntry;
 
 public class ManufacturerAgent extends Agent {
 	
 	SupOrder mySupOrder;
+	Buy buy;
 	
 	private int totalValueOfOrdersShipped;
 	private int penaltyForLateOrders;
@@ -83,7 +84,7 @@ public class ManufacturerAgent extends Agent {
 			e.printStackTrace();
 		}
 		
-//		addBehaviour(new ReceiverBehaviour(this));
+		addBehaviour(new ReceiverBehaviour(this));
 		addBehaviour(new TickerWaiter(this));
 		
 	}
@@ -174,27 +175,32 @@ public class ManufacturerAgent extends Agent {
 					// Let JADE convert from String to Java objects
 					// Output will be a ContentElement
 					ce = getContentManager().extractContent(msg);
+					
 					if(ce instanceof Action) {
-						Concept action = ((Action)ce).getAction();
-						if (action instanceof Order) {
-							Order order = (Order)action;
-							PC _currentPC = order.getMyPC();
-							// Extract the CD name and print it to demonstrate use of the ontology
-							if(_currentPC instanceof PC) {
-								PC currentPC = (PC)_currentPC;
+						Concept _action = ((Action)ce).getAction();
+						if (_action instanceof Buy) {
+							Buy _buy = (Buy)_action;
+							System.out.println();
+							if (_buy instanceof Buy) {
+								Order _order = (Order)_buy;
 								
-								mySupOrder = new SupOrder();
 								
-								// Make 6 new components
-								components_in_demand.add(new Comp(currentPC.getCpu(), 1));
-								components_in_demand.add(new Comp(currentPC.getHarddrive(), 1));
-								components_in_demand.add(new Comp(currentPC.getMemory(), 1));
-								components_in_demand.add(new Comp(currentPC.getMotherboard(), 1));
-								components_in_demand.add(new Comp(currentPC.getOs(), 1));
-								components_in_demand.add(new Comp(currentPC.getType(), 1));
 								
-								mySupOrder.setComponents_in_demand(components_in_demand);
 								
+								
+								PC _currentPC = order.getMyPC();
+								// Extract the CD name and print it to demonstrate use of the ontology
+								if(_currentPC instanceof PC) {
+									PC currentPC = (PC)_currentPC;
+									
+									System.out.println("MAN: " + currentPC.toString());
+									System.out.println("MAN: " + order.toString());
+									
+//									buy = new Buy(new Order(currentPC));
+//									
+//									buy.toString();
+									
+								}
 							}
 						}
 					}
