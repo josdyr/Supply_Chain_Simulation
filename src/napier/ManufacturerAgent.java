@@ -36,11 +36,16 @@ import supply_chain_simulation_ontology.elements.actions.Buy;
 import supply_chain_simulation_ontology.elements.concepts.Comp;
 import supply_chain_simulation_ontology.elements.concepts.Order;
 import supply_chain_simulation_ontology.elements.concepts.PC;
-import supply_chain_simulation_ontology.elements.concepts.SupOrder;
 
 public class ManufacturerAgent extends Agent {
 	
-	SupOrder mySupOrder;
+	static Integer dailyPenaltyForLateOrders = 50;
+	static Integer dailyWarehouseStorage = 5;
+	
+	private ArrayList<AID> supplierAgents = new ArrayList<>();
+	ArrayList<HashMap<String, Integer>> suppliers_info = new ArrayList<HashMap<String, Integer>>();
+	ArrayList<Integer> deliver_in_days = new ArrayList<>();
+	
 	Buy buy;
 	
 	private int totalValueOfOrdersShipped;
@@ -68,6 +73,45 @@ public class ManufacturerAgent extends Agent {
 		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
 		
 		mySupplierAgentAID = new AID("mySupplierAgent", AID.ISLOCALNAME);
+		
+		ArrayList<String> comps = new ArrayList<>();
+		comps.add("Laptop_CPU");
+		comps.add("Desktop_CPU");
+		comps.add("Laptop_Motherboard");
+		comps.add("Desktop_Motherboard");
+		comps.add("RAM_8Gb");
+		comps.add("RAM_16Gb");
+		comps.add("HDD_1Tb");
+		comps.add("HDD_2Tb");
+		comps.add("Screen");
+		comps.add("OS_Windows");
+		comps.add("OS_Linux");
+		
+		HashMap<String, Integer> s1 = new HashMap<String, Integer>();
+		HashMap<String, Integer> s2 = new HashMap<String, Integer>();
+		HashMap<String, Integer> s3 = new HashMap<String, Integer>();
+		
+		// Process CSV file
+		// Populate the suppliers_info
+		Object[] sup_info = getArguments();
+		
+		Object[] _s1 = (Object[])sup_info[0];
+		Object[] _s2 = (Object[])sup_info[1];
+		Object[] _s3 = (Object[])sup_info[2];
+		
+		for (int i = 0; i < 11; i++) {
+			s1.put(comps.get(i), Integer.parseInt((String) _s1[i]));
+			s2.put(comps.get(i), Integer.parseInt((String) _s2[i]));
+			s3.put(comps.get(i), Integer.parseInt((String) _s3[i]));
+		}
+		
+		suppliers_info.add(s1);
+		suppliers_info.add(s2);
+		suppliers_info.add(s3);
+		
+		deliver_in_days.add(1);
+		deliver_in_days.add(3);
+		deliver_in_days.add(7);
 		
 		//add this agent to the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -122,8 +166,9 @@ public class ManufacturerAgent extends Agent {
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					
 					//sub-behaviours will execute in the order they are added
+					dailyActivity.addSubBehaviour(new FindSuppliers(myAgent));
 					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
-					dailyActivity.addSubBehaviour(new SendOrder(myAgent));
+//					dailyActivity.addSubBehaviour(new SendOrder(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
@@ -142,6 +187,37 @@ public class ManufacturerAgent extends Agent {
 				}
 			} else {
 				block();
+			}
+		}
+		
+	}
+	
+	//create the SearchYellowPages behaviour
+	public class FindSuppliers extends OneShotBehaviour {
+		
+		public FindSuppliers(Agent agent) {
+			super(agent);
+		}
+		
+		@Override
+		public void action() {
+			//create a template
+			DFAgentDescription dfd = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			
+			sd.setType("supplier-agent");;
+			dfd.addServices(sd);
+			
+			//query the dfAgent
+			try {
+				supplierAgents.clear();
+				DFAgentDescription[] result = DFService.search(myAgent, dfd);
+				
+				for (int i = result.length-1; i >= 0; i--) {
+					supplierAgents.add(result[i].getName());
+				}
+			} catch (FIPAException e) {
+				e.printStackTrace();
 			}
 		}
 		
@@ -167,40 +243,71 @@ public class ManufacturerAgent extends Agent {
 					ContentElement ce = null;
 					
 					// Print out the message content in SL
-					System.out.println(
-							"    " + "Agent: " + myAgent.getLocalName() + "\n" +
-							"\t" + "Message received from " + msg.getSender() + "\n" +
-							"\t" + "Content: " + msg.getContent() + "\n");
+					System.out.println("-> " + myAgent.getLocalName() + ": ");
+					System.out.println("   * " + "Message received from " + msg.getSender().getLocalName());
+					System.out.println("   * " + "Content: " + msg.getContent());
 
-					// Let JADE convert from String to Java objects
-					// Output will be a ContentElement
 					ce = getContentManager().extractContent(msg);
-					
 					if(ce instanceof Action) {
 						Concept _action = ((Action)ce).getAction();
 						if (_action instanceof Buy) {
-							Buy _buy = (Buy)_action;
-							System.out.println();
-							if (_buy instanceof Buy) {
-								Order _order = (Order)_buy;
+							Buy buy = (Buy)_action;
+							Order order = buy.getOrder();
+							PC currentPC = order.getMyPC();
+							if(currentPC instanceof PC) {
 								
+								// == Calculate if manufacturer will gain profit on current order or not ==
 								
+								// Set current supplier to potentially order from [s1, s2, s3]
+								Integer sup_num = calcCurrentSupplier(order);
+								AID current_supplier_AID = supplierAgents.get(sup_num - 1);
+								System.out.println("   * " + "Current supplier: " + sup_num);
 								
+								// calculate the minimum cost from current set supplier
+								Integer current_min_cost = calcMinCostFromSupOrder(sup_num, order);
+								System.out.println("   * " + "Cost: " + current_min_cost);
 								
+								Integer days_in_warehouse = order.getDue_in_days() - deliver_in_days.get(sup_num-1);
+								System.out.println("   * " + "Days in warehouse: " + days_in_warehouse);
 								
-								PC _currentPC = order.getMyPC();
-								// Extract the CD name and print it to demonstrate use of the ontology
-								if(_currentPC instanceof PC) {
-									PC currentPC = (PC)_currentPC;
-									
-									System.out.println("MAN: " + currentPC.toString());
-									System.out.println("MAN: " + order.toString());
-									
-//									buy = new Buy(new Order(currentPC));
-//									
-//									buy.toString();
-									
+								Integer profit_on_single_order = order.getPrice() - current_min_cost;
+								System.out.println("   * " + "Profit on single order: " + profit_on_single_order);
+								
+								// If Manufacturer already have components in stock then:
+								if (profit_on_single_order > 0) { // If profit is positive
+									if (false) { // Components are in stock
+										// ...
+									} else { // Components not in stock
+										// forward order to supplier
+										// Prepare receiving template
+										ACLMessage sup_msg = new ACLMessage(ACLMessage.REQUEST);
+										sup_msg.addReceiver(current_supplier_AID);
+										sup_msg.setLanguage(codec.getName());
+										sup_msg.setOntology(ontology.getName());
+										
+										// Action Wrapper
+										Action request = new Action();
+										buy = new Buy();
+										buy.setOrder(order);
+										request.setAction(buy);
+										request.setActor(current_supplier_AID);
+										
+										try {
+											getContentManager().fillContent(sup_msg, request);
+											send(sup_msg);
+											System.out.println("   * " + "Forwarding order to supplier: " + sup_num);
+										}
+										catch (CodecException _ce) {
+											_ce.printStackTrace();
+										}
+										catch (OntologyException oe) {
+											oe.printStackTrace();
+										}
+									}
+								} else {
+									System.out.println("   * " + "Not an acceptable order. Price offered is too low.");
 								}
+								
 							}
 						}
 					}
@@ -215,9 +322,28 @@ public class ManufacturerAgent extends Agent {
 			}
 			else {
 				//put the behaviour to sleep until a message arrives
-				System.out.println("    " + myAgent.getLocalName() + " waiting for message...");
+				System.out.println("\n" + "-> " + myAgent.getLocalName());
+				System.out.println("   * " + "Waiting for a message...");
 				block();
 			}
+		}
+
+		public Integer calcCurrentSupplier(Order order) {
+			if (order.getDue_in_days() >= 7) { // s3
+				return 3;
+			} else if (order.getDue_in_days() >= 3) { // s2
+				return 2;
+			} else { // s1
+				return 1;
+			}
+		}
+
+		private Integer calcMinCostFromSupOrder(Integer current_supplier, Order order) {
+			Integer total_cost = 0;
+			for (Comp comp_order : order.getMyPC().getPc_components()) {
+				total_cost += suppliers_info.get(current_supplier-1).get(comp_order.toString());
+			}
+			return total_cost;
 		}
 		
 	}
@@ -240,7 +366,7 @@ public class ManufacturerAgent extends Agent {
 				
 				// Action Wrapper
 				Action request = new Action();
-				request.setAction(mySupOrder);
+//				request.setAction(mySupOrder);
 				request.setActor(mySupplierAgentAID);
 				
 				try {
@@ -274,30 +400,8 @@ public class ManufacturerAgent extends Agent {
 			msg.addReceiver(tickerAgent);
 			msg.setContent("done");
 			myAgent.send(msg);
-			
-//			//send a message to each seller that we have finished
-//			ACLMessage buyerDone = new ACLMessage(ACLMessage.INFORM);
-//			buyerDone.setContent("done");
-//			for(AID seller : sellers) {
-//				buyerDone.addReceiver(seller);
-//			}
-//			myAgent.send(buyerDone);
 		}
 		
 	}
-	
-//	private void addComp(List comps_in_demand, String Comp) {
-//		
-//		Integer value;
-//		
-//		// If Comp already in list, then just increment the value by 1 - Otherwise, add the comp and amount=1
-//		if (comps_in_demand.containsKey(Comp)) {
-//			value = (Integer) comps_in_demand.get(Comp);
-//			comps_in_demand.put(Comp, value + 1);
-//		} else { // Else add the Comp and the value 1
-//			comps_in_demand.put(Comp, 1);
-//		}
-//		
-//	}
 	
 }

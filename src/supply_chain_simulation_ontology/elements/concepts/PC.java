@@ -11,4 +11,6 @@ public abstract class PC implements Concept {
 	
 	public abstract void appendComp(Comp c);
 	
+	public abstract ArrayList<Comp> getPc_components();
+	
 }

@@ -13,7 +13,7 @@ import jade.lang.acl.MessageTemplate;
 
 public class SynchTickerAgent extends Agent {
 	
-	public static final int NUM_DAYS = 10;
+	public static final int NUM_DAYS = 90;
 	
 	@Override
 	protected void setup() {
@@ -36,8 +36,7 @@ public class SynchTickerAgent extends Agent {
 		
 		// Make sure all agents have started
 		System.out.println("Waiting to make sure all agents get enrolled...");
-		doWait(2000);
-//		doWait(20000);
+		doWait(1000);
 		
 		System.out.println("\n\n" + "=== Starting simulation ===" + "\n");
 		
@@ -59,7 +58,7 @@ public class SynchTickerAgent extends Agent {
 		
 		private int step = 0; //where we are in the behaviour
 		private int numFinReceived = 0; //number of finished messages from other agents
-		private int day = 0;
+		private int day = 1;
 		private ArrayList<AID> simulationAgents = new ArrayList<>();
 		
 		public SynchAgentsBehaviour(Agent a) {
@@ -116,7 +115,7 @@ public class SynchTickerAgent extends Agent {
 				for (AID id : simulationAgents) {
 					tick.addReceiver(id);
 				}
-				System.out.println("= New Day =" + "\n");
+				System.out.println("= Day " + day + " =");
 				myAgent.send(tick);
 				step++;
 				day++;
@@ -153,8 +152,8 @@ public class SynchTickerAgent extends Agent {
 		
 		@Override
 		public int onEnd() {
-			System.out.println("= End of day " + day + " =\n");
-			if(day == NUM_DAYS) {
+			System.out.println("\n" + "= End of day " + (day-1) + " =\n");
+			if(day == NUM_DAYS+1) {
 				//send termination message to each agent
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.setContent("terminate");

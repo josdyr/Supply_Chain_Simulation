@@ -27,8 +27,7 @@ public class Laptop extends PC {
 	public String toString() {
 		return "Laptop [pc_components=" + pc_components + "]";
 	}
-	
-	// Getters and Setters
+
 	public ArrayList<Comp> getPc_components() {
 		return pc_components;
 	}

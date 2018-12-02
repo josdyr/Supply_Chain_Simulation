@@ -15,6 +15,7 @@ import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
@@ -27,17 +28,22 @@ import jade.lang.acl.MessageTemplate;
 import napier.ManufacturerAgent.EndDay;
 import napier.ManufacturerAgent.ReceiverBehaviour;
 import supply_chain_simulation_ontology.ECommerceOntology;
+import supply_chain_simulation_ontology.elements.actions.Buy;
+import supply_chain_simulation_ontology.elements.actions.Supply;
 import supply_chain_simulation_ontology.elements.concepts.Comp;
+import supply_chain_simulation_ontology.elements.concepts.Delivery;
 import supply_chain_simulation_ontology.elements.concepts.Order;
 import supply_chain_simulation_ontology.elements.concepts.PC;
-import supply_chain_simulation_ontology.elements.concepts.SupOrder;
 
 public class SupplierAgent extends Agent {
 	
-	ArrayList<Comp> components_in_demand = new ArrayList<>();
-	
+	HashMap<Integer, ArrayList<Delivery>> all_deliveries_queue = new HashMap<Integer, ArrayList<Delivery>>();
+
 	private int day = 0;
 	private AID tickerAgent;
+	private String _sup_num;
+	
+	ArrayList<Integer> deliver_in_days = new ArrayList<>();
 	
 	private Codec codec = new SLCodec();
 	private Ontology ontology = ECommerceOntology.getInstance();
@@ -50,6 +56,10 @@ public class SupplierAgent extends Agent {
 		
 		// Print out a welcome message
 		System.out.println("Enrolled: " + getAID().getName() + ", standing by...");
+		
+		deliver_in_days.add(1);
+		deliver_in_days.add(3);
+		deliver_in_days.add(7);
 		
 		//add this agent to the yellow pages
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -105,6 +115,7 @@ public class SupplierAgent extends Agent {
 					//sub-behaviours will execute in the order they are added
 					doWait(2000); // Hardcode a timer to wait for the first message
 					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
+					dailyActivity.addSubBehaviour(new SenderBehaviour(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
@@ -146,34 +157,43 @@ public class SupplierAgent extends Agent {
 					ContentElement ce = null;
 					
 					// Print out the message content in SL
-					System.out.println(
-							"    " + "Agent: " + myAgent.getLocalName() + "\n" +
-							"\t" + "Message received from " + msg.getSender() + "\n" +
-							"\t" + "Content: " + msg.getContent() + "\n");
+					System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
+					System.out.println("   * " + "Message received from " + msg.getSender());
+					System.out.println("   * " + "Content: " + msg.getContent());
 
 					// Let JADE convert from String to Java objects
 					// Output will be a ContentElement
 					ce = getContentManager().extractContent(msg);
 					if(ce instanceof Action) {
 						Concept action = ((Action)ce).getAction();
-						if (action instanceof SupOrder) {
-							SupOrder sup_order = (SupOrder)action;
-							components_in_demand = sup_order.getComponents_in_demand();
-							
-							System.out.println(sup_order.getComponents_in_demand().size());
-							System.out.println(sup_order.getComponents_in_demand().get(0));
-							System.out.println(components_in_demand.size());
-							
-							// Extract the content and demonstrate the use of the ontology
-							System.out.println(
-									"    " + "Agent: " + myAgent.getLocalName() + "\n"
-									+ "    " + "    Extracting Content...");
-							
-							// Print Components in Demand
-							for (int i = 0; i < components_in_demand.size(); i++) {
-								System.out.println("comp_" + i + " being ordered: " + components_in_demand.get(i).toString());
+						if (action instanceof Buy) {
+							Buy buy = (Buy)action;
+							Order order = buy.getOrder();
+							PC currentPC = order.getMyPC();
+							if (currentPC instanceof PC) {
+								
+								// Append Delivery to all_deliveries list
+								_sup_num = myAgent.getLocalName().substring(myAgent.getLocalName().length()-1);
+								Integer sup_num = Integer.parseInt(_sup_num);
+								Integer delivery_day = day + deliver_in_days.get(sup_num-1);
+								ArrayList<Delivery> daily_list = new ArrayList<Delivery>();
+								
+								if (all_deliveries_queue.containsKey(delivery_day)) {
+									// Amend Daily List
+									daily_list = all_deliveries_queue.get(delivery_day);
+									daily_list.add(new Delivery(order.getMyPC()));
+									all_deliveries_queue.put(delivery_day, daily_list);
+								} else {
+									// Make a new Daily List
+									daily_list.add(new Delivery(order.getMyPC()));
+									all_deliveries_queue.put(delivery_day, daily_list);
+								}
+								
+								System.out.println("   * " + "Delivery added to queue.");
+								System.out.println("   * " + "Delivery to " + msg.getSender().getLocalName() + " is on day: " + delivery_day);
+								System.out.println("   * " + "Delivery to myCustomerAgent is on day: " + (day+order.getDue_in_days()));
+								
 							}
-							
 						}
 					}
 				}
@@ -187,12 +207,39 @@ public class SupplierAgent extends Agent {
 			}
 			else {
 				//put the behaviour to sleep until a message arrives
-				System.out.println("    " + myAgent.getLocalName() + " waiting for message...");
-				block();
+				System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
+				System.out.println("   * " + "Waiting for message...");
+				block(1000);
 			}
 		}
 		
 	}
+	
+	//create a cyclic behaviour
+		public class SenderBehaviour extends OneShotBehaviour {
+			
+			public SenderBehaviour(Agent agent) {
+				super(agent);
+			}
+			
+			@Override
+			public void action() {
+				
+				if (all_deliveries_queue.containsKey(day)) {
+					System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
+					System.out.println("   * " + "Supplying delivery to myManufacturerAgent...");
+					for (Delivery current_delivery : all_deliveries_queue.get(day)) {
+						System.out.println("   * " + current_delivery.toString());
+						
+						// Deliver a msg(Supply(Delivery(PC())))
+						
+						
+					}
+				}
+				
+			}
+			
+		}
 	
 	public class EndDay extends OneShotBehaviour {
 		
