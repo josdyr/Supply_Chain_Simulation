@@ -26,7 +26,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import napier.ManufacturerAgent.EndDay;
-import napier.ManufacturerAgent.ReceiverBehaviour;
+import napier.ManufacturerAgent.ReceiveAndForwardCustumerOrders;
 import supply_chain_simulation_ontology.ECommerceOntology;
 import supply_chain_simulation_ontology.elements.actions.Buy;
 import supply_chain_simulation_ontology.elements.actions.Supply;
@@ -42,6 +42,7 @@ public class SupplierAgent extends Agent {
 	private int day = 0;
 	private AID tickerAgent;
 	private String _sup_num;
+	private AID manufacturer_AID;
 	
 	ArrayList<Integer> deliver_in_days = new ArrayList<>();
 	
@@ -138,7 +139,7 @@ public class SupplierAgent extends Agent {
 	
 	//create a cyclic behaviour
 	public class ReceiverBehaviour extends OneShotBehaviour {
-		
+
 		public ReceiverBehaviour(Agent agent) {
 			super(agent);
 		}
@@ -149,7 +150,10 @@ public class SupplierAgent extends Agent {
 			//try to receive a message
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
 			ACLMessage msg = myAgent.receive(mt);
+			
 			if (msg != null) {
+				
+				manufacturer_AID = msg.getSender();
 				
 				// = Process the message =
 				
@@ -227,12 +231,34 @@ public class SupplierAgent extends Agent {
 				
 				if (all_deliveries_queue.containsKey(day)) {
 					System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
-					System.out.println("   * " + "Supplying delivery to myManufacturerAgent...");
 					for (Delivery current_delivery : all_deliveries_queue.get(day)) {
 						System.out.println("   * " + current_delivery.toString());
 						
 						// Deliver a msg(Supply(Delivery(PC())))
+						// Prepare receiving template
+						ACLMessage sup_msg = new ACLMessage(ACLMessage.INFORM);
+						sup_msg.addReceiver(manufacturer_AID);
+						sup_msg.setLanguage(codec.getName());
+						sup_msg.setOntology(ontology.getName());
 						
+						// Action Wrapper
+						Action inform = new Action();
+						Supply supply = new Supply();
+						supply.setDelivery(current_delivery);
+						inform.setAction(supply);
+						inform.setActor(manufacturer_AID);
+						
+						try {
+							System.out.println("   * " + "Supplying delivery to myManufacturerAgent...");
+							getContentManager().fillContent(sup_msg, inform);
+							send(sup_msg);
+						}
+						catch (CodecException _ce) {
+							_ce.printStackTrace();
+						}
+						catch (OntologyException oe) {
+							oe.printStackTrace();
+						}
 						
 					}
 				}

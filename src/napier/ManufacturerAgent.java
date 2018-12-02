@@ -1,6 +1,7 @@
 package napier;
 
 import java.lang.reflect.Method;
+import java.time.Period;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ReceiverBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -128,7 +130,7 @@ public class ManufacturerAgent extends Agent {
 			e.printStackTrace();
 		}
 		
-		addBehaviour(new ReceiverBehaviour(this));
+		addBehaviour(new ReceiveAndForwardCustumerOrders(this));
 		addBehaviour(new TickerWaiter(this));
 		
 	}
@@ -167,15 +169,14 @@ public class ManufacturerAgent extends Agent {
 					
 					//sub-behaviours will execute in the order they are added
 					dailyActivity.addSubBehaviour(new FindSuppliers(myAgent));
-					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
-//					dailyActivity.addSubBehaviour(new SendOrder(myAgent));
+					dailyActivity.addSubBehaviour(new ReceiveAndForwardCustumerOrders(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
 					myAgent.addBehaviour(dailyActivity);
 					
 					//normal behaviours will execute normally
-					// ...
+					addBehaviour(new ReceiveSupply(myAgent));
 					
 					// Wait a bit only the first day in order to receive the first message
 					doWait(1000);
@@ -224,9 +225,9 @@ public class ManufacturerAgent extends Agent {
 	}
 	
 	//create a cyclic behaviour
-	public class ReceiverBehaviour extends OneShotBehaviour {
+	public class ReceiveAndForwardCustumerOrders extends OneShotBehaviour {
 		
-		public ReceiverBehaviour(Agent agent) {
+		public ReceiveAndForwardCustumerOrders(Agent agent) {
 			super(agent);
 		}
 		
@@ -349,44 +350,30 @@ public class ManufacturerAgent extends Agent {
 	}
 	
 	//create the SenderBehaviour behaviour
-		public class SendOrder extends OneShotBehaviour {
-			
-			public SendOrder(Agent agent) {
-				super(agent);
-			}
-			
-			@Override
-			public void action() {
-				
-				// Prepare receiving template
-				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-				msg.addReceiver(mySupplierAgentAID);
-				msg.setLanguage(codec.getName());
-				msg.setOntology(ontology.getName());
-				
-				// Action Wrapper
-				Action request = new Action();
-//				request.setAction(mySupOrder);
-				request.setActor(mySupplierAgentAID);
-				
-				try {
-					getContentManager().fillContent(msg, request);
-					send(msg);
-					
-					System.out.println(
-							"    " + "Agent: " + myAgent.getLocalName() + "\n"
-							+ "    " + "    Message sent to " + mySupplierAgentAID.getLocalName() + "\n");
-				}
-				catch (CodecException ce) {
-					ce.printStackTrace();
-				}
-				catch (OntologyException oe) {
-					oe.printStackTrace();
-				}
-				
-			}
-			
+	public class ReceiveSupply extends CyclicBehaviour {
+		
+		public ReceiveSupply(Agent agent) {
+			super(agent);
 		}
+		
+		@Override
+		public void action() {
+			//try to receive a message
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			ACLMessage msg = myAgent.receive(mt);
+			
+			if(msg != null) {
+				// process the message
+				System.out.println("-> " + myAgent.getLocalName() + ": ");
+				System.out.println("   * " + "I have received a DELIVERY...");
+			}
+			else {
+				//put the behaviour to sleep until //a message arrives
+				block();
+			}
+		}
+		
+	}
 	
 	public class EndDay extends OneShotBehaviour {
 		
