@@ -137,7 +137,6 @@ public class SupplierAgent extends Agent {
 		
 	}
 	
-	//create a cyclic behaviour
 	public class ReceiverBehaviour extends OneShotBehaviour {
 
 		public ReceiverBehaviour(Agent agent) {
@@ -208,8 +207,7 @@ public class SupplierAgent extends Agent {
 					oe.printStackTrace();
 				}
 				
-			}
-			else {
+			} else {
 				//put the behaviour to sleep until a message arrives
 				System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
 				System.out.println("   * " + "Waiting for message...");
@@ -220,52 +218,52 @@ public class SupplierAgent extends Agent {
 	}
 	
 	//create a cyclic behaviour
-		public class SenderBehaviour extends OneShotBehaviour {
+	public class SenderBehaviour extends OneShotBehaviour {
+		
+		public SenderBehaviour(Agent agent) {
+			super(agent);
+		}
+		
+		@Override
+		public void action() {
 			
-			public SenderBehaviour(Agent agent) {
-				super(agent);
-			}
-			
-			@Override
-			public void action() {
-				
-				if (all_deliveries_queue.containsKey(day)) {
-					System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
-					for (Delivery current_delivery : all_deliveries_queue.get(day)) {
-						System.out.println("   * " + current_delivery.toString());
-						
-						// Deliver a msg(Supply(Delivery(PC())))
-						// Prepare receiving template
-						ACLMessage sup_msg = new ACLMessage(ACLMessage.INFORM);
-						sup_msg.addReceiver(manufacturer_AID);
-						sup_msg.setLanguage(codec.getName());
-						sup_msg.setOntology(ontology.getName());
-						
-						// Action Wrapper
-						Action inform = new Action();
-						Supply supply = new Supply();
-						supply.setDelivery(current_delivery);
-						inform.setAction(supply);
-						inform.setActor(manufacturer_AID);
-						
-						try {
-							System.out.println("   * " + "Supplying delivery to myManufacturerAgent...");
-							getContentManager().fillContent(sup_msg, inform);
-							send(sup_msg);
-						}
-						catch (CodecException _ce) {
-							_ce.printStackTrace();
-						}
-						catch (OntologyException oe) {
-							oe.printStackTrace();
-						}
-						
+			if (all_deliveries_queue.containsKey(day)) {
+				System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
+				for (Delivery current_delivery : all_deliveries_queue.get(day)) {
+					System.out.println("   * " + current_delivery.toString());
+					
+					// Deliver a msg(Supply(Delivery(PC())))
+					// Prepare receiving template
+					ACLMessage sup_msg = new ACLMessage(ACLMessage.INFORM);
+					sup_msg.addReceiver(manufacturer_AID);
+					sup_msg.setLanguage(codec.getName());
+					sup_msg.setOntology(ontology.getName());
+					
+					// Action Wrapper
+					Action inform = new Action();
+					Supply supply = new Supply();
+					supply.setDelivery(current_delivery);
+					inform.setAction(supply);
+					inform.setActor(manufacturer_AID);
+					
+					try {
+						System.out.println("   * " + "Supplying delivery to myManufacturerAgent...");
+						getContentManager().fillContent(sup_msg, inform);
+						send(sup_msg);
 					}
+					catch (CodecException _ce) {
+						_ce.printStackTrace();
+					}
+					catch (OntologyException oe) {
+						oe.printStackTrace();
+					}
+					
 				}
-				
 			}
 			
 		}
+		
+	}
 	
 	public class EndDay extends OneShotBehaviour {
 		

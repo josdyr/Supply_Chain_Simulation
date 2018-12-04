@@ -21,6 +21,7 @@ import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ReceiverBehaviour;
@@ -47,6 +48,7 @@ public class ManufacturerAgent extends Agent {
 	private ArrayList<AID> supplierAgents = new ArrayList<>();
 	ArrayList<HashMap<String, Integer>> suppliers_info = new ArrayList<HashMap<String, Integer>>();
 	ArrayList<Integer> deliver_in_days = new ArrayList<>();
+	HashMap<Integer, Integer> expected_messages = new HashMap<>();
 	
 	Buy buy;
 	
@@ -176,7 +178,7 @@ public class ManufacturerAgent extends Agent {
 					myAgent.addBehaviour(dailyActivity);
 					
 					//normal behaviours will execute normally
-					addBehaviour(new ReceiveSupply(myAgent));
+//					addBehaviour(new ReceiveSupply(myAgent));
 					
 					// Wait a bit only the first day in order to receive the first message
 					doWait(1000);
@@ -233,99 +235,102 @@ public class ManufacturerAgent extends Agent {
 		
 		@Override
 		public void action() {
-			//try to receive a message
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
-			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null) {
-				
-				// = Process the message =
-				
-				try {
-					ContentElement ce = null;
+			for (int i = 0; i < 3; i++) {
+				//try to receive a message
+				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
+				ACLMessage msg = myAgent.receive(mt);
+				if (msg != null) {
 					
-					// Print out the message content in SL
-					System.out.println("-> " + myAgent.getLocalName() + ": ");
-					System.out.println("   * " + "Message received from " + msg.getSender().getLocalName());
-					System.out.println("   * " + "Content: " + msg.getContent());
+					// = Process the message =
+					
+					try {
+						ContentElement ce = null;
+						
+						// Print out the message content in SL
+						System.out.println("-> " + myAgent.getLocalName() + ": ");
+						System.out.println("   * " + "Message received from " + msg.getSender().getLocalName());
+						System.out.println("   * " + "Content: " + msg.getContent());
 
-					ce = getContentManager().extractContent(msg);
-					if(ce instanceof Action) {
-						Concept _action = ((Action)ce).getAction();
-						if (_action instanceof Buy) {
-							Buy buy = (Buy)_action;
-							Order order = buy.getOrder();
-							PC currentPC = order.getMyPC();
-							if(currentPC instanceof PC) {
-								
-								// == Calculate if manufacturer will gain profit on current order or not ==
-								
-								// Set current supplier to potentially order from [s1, s2, s3]
-								Integer sup_num = calcCurrentSupplier(order);
-								AID current_supplier_AID = supplierAgents.get(sup_num - 1);
-								System.out.println("   * " + "Current supplier: " + sup_num);
-								
-								// calculate the minimum cost from current set supplier
-								Integer current_min_cost = calcMinCostFromSupOrder(sup_num, order);
-								System.out.println("   * " + "Cost: " + current_min_cost);
-								
-								Integer days_in_warehouse = order.getDue_in_days() - deliver_in_days.get(sup_num-1);
-								System.out.println("   * " + "Days in warehouse: " + days_in_warehouse);
-								
-								Integer profit_on_single_order = order.getPrice() - current_min_cost;
-								System.out.println("   * " + "Profit on single order: " + profit_on_single_order);
-								
-								// If Manufacturer already have components in stock then:
-								if (profit_on_single_order > 0) { // If profit is positive
-									if (false) { // Components are in stock
-										// ...
-									} else { // Components not in stock
-										// forward order to supplier
-										// Prepare receiving template
-										ACLMessage sup_msg = new ACLMessage(ACLMessage.REQUEST);
-										sup_msg.addReceiver(current_supplier_AID);
-										sup_msg.setLanguage(codec.getName());
-										sup_msg.setOntology(ontology.getName());
-										
-										// Action Wrapper
-										Action request = new Action();
-										buy = new Buy();
-										buy.setOrder(order);
-										request.setAction(buy);
-										request.setActor(current_supplier_AID);
-										
-										try {
-											getContentManager().fillContent(sup_msg, request);
-											send(sup_msg);
-											System.out.println("   * " + "Forwarding order to supplier: " + sup_num);
+						ce = getContentManager().extractContent(msg);
+						if(ce instanceof Action) {
+							Concept _action = ((Action)ce).getAction();
+							if (_action instanceof Buy) {
+								Buy buy = (Buy)_action;
+								Order order = buy.getOrder();
+								PC currentPC = order.getMyPC();
+								if(currentPC instanceof PC) {
+									
+									// == Calculate if manufacturer will gain profit on current order or not ==
+									
+									// Set current supplier to potentially order from [s1, s2, s3]
+									Integer sup_num = calcCurrentSupplier(order);
+									AID current_supplier_AID = supplierAgents.get(sup_num - 1);
+									System.out.println("   * " + "Current supplier: " + sup_num);
+									
+									// calculate the minimum cost from current set supplier
+									Integer current_min_cost = calcMinCostFromSupOrder(sup_num, order);
+									System.out.println("   * " + "Cost: " + current_min_cost);
+									
+									Integer days_in_warehouse = order.getDue_in_days() - deliver_in_days.get(sup_num-1);
+									System.out.println("   * " + "Days in warehouse: " + days_in_warehouse);
+									
+									Integer profit_on_single_order = order.getPrice() - current_min_cost;
+									System.out.println("   * " + "Profit on single order: " + profit_on_single_order);
+									
+									// If Manufacturer already have components in stock then:
+									if (profit_on_single_order > 0) { // If profit is positive
+										if (false) { // Components are in stock
+											System.out.println("TODO: COMPONENTS ALREADY IN STOCK...");
+										} else { // Components not in stock
+											// forward order to supplier
+											// Prepare receiving template
+											ACLMessage sup_msg = new ACLMessage(ACLMessage.REQUEST);
+											sup_msg.addReceiver(current_supplier_AID);
+											sup_msg.setLanguage(codec.getName());
+											sup_msg.setOntology(ontology.getName());
+											
+											// Action Wrapper
+											Action request = new Action();
+											buy = new Buy();
+											buy.setOrder(order);
+											request.setAction(buy);
+											request.setActor(current_supplier_AID);
+											
+											try {
+												getContentManager().fillContent(sup_msg, request);
+												send(sup_msg);
+												
+												System.out.println("   * " + "Forwarding order to supplier: " + sup_num);
+											}
+											catch (CodecException _ce) {
+												_ce.printStackTrace();
+											}
+											catch (OntologyException oe) {
+												oe.printStackTrace();
+											}
 										}
-										catch (CodecException _ce) {
-											_ce.printStackTrace();
-										}
-										catch (OntologyException oe) {
-											oe.printStackTrace();
-										}
+									} else {
+										System.out.println("   * " + "Not an acceptable order. Price offered is too low.");
 									}
-								} else {
-									System.out.println("   * " + "Not an acceptable order. Price offered is too low.");
+									
 								}
-								
 							}
 						}
 					}
+					catch (CodecException ce) {
+						ce.printStackTrace();
+					}
+					catch (OntologyException oe) {
+						oe.printStackTrace();
+					}
+					
 				}
-				catch (CodecException ce) {
-					ce.printStackTrace();
+				else {
+					//put the behaviour to sleep until a message arrives
+					System.out.println("\n" + "-> " + myAgent.getLocalName());
+					System.out.println("   * " + "Waiting for a message...");
+					block();
 				}
-				catch (OntologyException oe) {
-					oe.printStackTrace();
-				}
-				
-			}
-			else {
-				//put the behaviour to sleep until a message arrives
-				System.out.println("\n" + "-> " + myAgent.getLocalName());
-				System.out.println("   * " + "Waiting for a message...");
-				block();
 			}
 		}
 
@@ -349,8 +354,7 @@ public class ManufacturerAgent extends Agent {
 		
 	}
 	
-	//create the SenderBehaviour behaviour
-	public class ReceiveSupply extends CyclicBehaviour {
+	public class ReceiveSupply extends OneShotBehaviour {
 		
 		public ReceiveSupply(Agent agent) {
 			super(agent);
@@ -358,19 +362,11 @@ public class ManufacturerAgent extends Agent {
 		
 		@Override
 		public void action() {
-			//try to receive a message
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-			ACLMessage msg = myAgent.receive(mt);
 			
-			if(msg != null) {
-				// process the message
-				System.out.println("-> " + myAgent.getLocalName() + ": ");
-				System.out.println("   * " + "I have received a DELIVERY...");
-			}
-			else {
-				//put the behaviour to sleep until //a message arrives
-				block();
-			}
+//			for (int i =0; i < expected_messages.length; i++) {
+//				
+//			}
+			
 		}
 		
 	}

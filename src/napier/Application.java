@@ -95,7 +95,7 @@ public class Application {
 
 			// Spin off CustumerAgents
 			Object[] cus_num = new Object[1];
-			int numCustumerAgents = 1;
+			int numCustumerAgents = 3;
 			for(int i = 0; i < numCustumerAgents; i++) {
 				AgentController CustomerAgent;
 				cus_num[0] = i+1;
