@@ -36,7 +36,9 @@ import jade.lang.acl.MessageTemplate;
 
 import supply_chain_simulation_ontology.ECommerceOntology;
 import supply_chain_simulation_ontology.elements.actions.Buy;
+import supply_chain_simulation_ontology.elements.actions.Supply;
 import supply_chain_simulation_ontology.elements.concepts.Comp;
+import supply_chain_simulation_ontology.elements.concepts.Delivery;
 import supply_chain_simulation_ontology.elements.concepts.Order;
 import supply_chain_simulation_ontology.elements.concepts.PC;
 
@@ -133,6 +135,7 @@ public class ManufacturerAgent extends Agent {
 		}
 		
 		addBehaviour(new TickerWaiter(this));
+		addBehaviour(new ReceiveSupply(this));
 		
 	}
 	
@@ -244,13 +247,6 @@ public class ManufacturerAgent extends Agent {
 					
 					try {
 						ContentElement ce = null;
-						
-						// Print out the message content in SL
-//						System.out.println(
-//								"-> " + myAgent.getLocalName() + ": " +
-//								"   * " + "Message received from " + msg.getSender().getLocalName() +
-//								"   * " + "Content: " + msg.getContent()
-//								);
 
 						ce = getContentManager().extractContent(msg);
 						if(ce instanceof Action) {
@@ -375,7 +371,54 @@ public class ManufacturerAgent extends Agent {
 		@Override
 		public void action() {
 			
-			System.out.println(myAgent.getLocalName() + " is receiving SUPPLY...");
+			//try to receive a message
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			ACLMessage msg = myAgent.receive(mt);
+			
+			if (msg != null) {
+				
+				// = Process the message =
+				
+				System.out.println(myAgent.getLocalName() + " reveived supply from: " + msg.getSender());
+				
+				try {
+					ContentElement ce = null;
+
+					// Let JADE convert from String to Java objects
+					// Output will be a ContentElement
+					ce = getContentManager().extractContent(msg);
+					if(ce instanceof Action) {
+						Concept action = ((Action)ce).getAction();
+						if (action instanceof Supply) {
+							Supply supply = (Supply)action;
+							Delivery delivery = supply.getDelivery();
+							PC currentPC = delivery.getMyPC();
+							if (currentPC instanceof PC) {
+								
+								// == Process message ==
+								// formality: receive physical supply INFORM msg (processing already done in ReceiveAndForwardCustumerOrders behaviour...)
+								// TODO: forward PC back to original customer
+								// TODO: receive physical payment from original customer
+								
+							}
+						}
+					}
+				}
+				catch (CodecException ce) {
+					ce.printStackTrace();
+				}
+				catch (OntologyException oe) {
+					oe.printStackTrace();
+				}
+				
+			} else {
+				//put the behaviour to sleep until a message arrives
+				System.out.println(
+						"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+						"   * " + "Waiting for message..."
+							);
+				block();
+			}
 			
 		}
 		

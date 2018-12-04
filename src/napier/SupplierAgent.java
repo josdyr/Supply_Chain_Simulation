@@ -78,7 +78,7 @@ public class SupplierAgent extends Agent {
 		}
 		
 		addBehaviour(new TickerWaiter(this));
-		addBehaviour(new ReceiverBehaviour(this));
+		addBehaviour(new ReceiveRequest(this));
 		
 	}
 	
@@ -138,9 +138,9 @@ public class SupplierAgent extends Agent {
 		
 	}
 	
-	public class ReceiverBehaviour extends CyclicBehaviour {
+	public class ReceiveRequest extends CyclicBehaviour {
 
-		public ReceiverBehaviour(Agent agent) {
+		public ReceiveRequest(Agent agent) {
 			super(agent);
 		}
 		
