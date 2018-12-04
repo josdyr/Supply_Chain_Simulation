@@ -78,6 +78,7 @@ public class SupplierAgent extends Agent {
 		}
 		
 		addBehaviour(new TickerWaiter(this));
+		addBehaviour(new ReceiverBehaviour(this));
 		
 	}
 	
@@ -115,7 +116,7 @@ public class SupplierAgent extends Agent {
 					
 					//sub-behaviours will execute in the order they are added
 					doWait(2000); // Hardcode a timer to wait for the first message
-					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
+//					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
 					dailyActivity.addSubBehaviour(new SenderBehaviour(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
@@ -137,7 +138,7 @@ public class SupplierAgent extends Agent {
 		
 	}
 	
-	public class ReceiverBehaviour extends OneShotBehaviour {
+	public class ReceiverBehaviour extends CyclicBehaviour {
 
 		public ReceiverBehaviour(Agent agent) {
 			super(agent);
@@ -158,11 +159,6 @@ public class SupplierAgent extends Agent {
 				
 				try {
 					ContentElement ce = null;
-					
-					// Print out the message content in SL
-					System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
-					System.out.println("   * " + "Message received from " + msg.getSender());
-					System.out.println("   * " + "Content: " + msg.getContent());
 
 					// Let JADE convert from String to Java objects
 					// Output will be a ContentElement
@@ -192,10 +188,14 @@ public class SupplierAgent extends Agent {
 									all_deliveries_queue.put(delivery_day, daily_list);
 								}
 								
-								System.out.println("   * " + "Delivery added to queue.");
-								System.out.println("   * " + "Delivery to " + msg.getSender().getLocalName() + " is on day: " + delivery_day);
-								System.out.println("   * " + "Delivery to myCustomerAgent is on day: " + (day+order.getDue_in_days()));
-								
+								System.out.println(
+										"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+										"   * " + "Message received from " + msg.getSender() + "\n" +
+										"   * " + "Content: " + msg.getContent() + "\n" +
+										"   * " + "Delivery added to queue." + "\n" +
+										"   * " + "Delivery to " + msg.getSender().getLocalName() + " is on day: " + delivery_day + "\n" +
+										"   * " + "Delivery to myCustomerAgent is on day: " + (day+order.getDue_in_days())
+								);								
 							}
 						}
 					}
@@ -209,9 +209,11 @@ public class SupplierAgent extends Agent {
 				
 			} else {
 				//put the behaviour to sleep until a message arrives
-				System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
-				System.out.println("   * " + "Waiting for message...");
-				block(1000);
+				System.out.println(
+						"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+						"   * " + "Waiting for message..."
+							);
+				block();
 			}
 		}
 		
@@ -228,9 +230,7 @@ public class SupplierAgent extends Agent {
 		public void action() {
 			
 			if (all_deliveries_queue.containsKey(day)) {
-				System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
 				for (Delivery current_delivery : all_deliveries_queue.get(day)) {
-					System.out.println("   * " + current_delivery.toString());
 					
 					// Deliver a msg(Supply(Delivery(PC())))
 					// Prepare receiving template
@@ -247,7 +247,11 @@ public class SupplierAgent extends Agent {
 					inform.setActor(manufacturer_AID);
 					
 					try {
-						System.out.println("   * " + "Supplying delivery to myManufacturerAgent...");
+						System.out.println(
+								"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+								"   * " + current_delivery.toString() + "\n" +
+								"   * " + "Supplying delivery to myManufacturerAgent..." + "\n"
+									);
 						getContentManager().fillContent(sup_msg, inform);
 						send(sup_msg);
 					}

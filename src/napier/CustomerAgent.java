@@ -215,9 +215,11 @@ public class CustomerAgent extends Agent {
 			myOrder.setTotal_price(myOrder.getQuantity() * (int)Math.floor(600 + 200 * rand.nextFloat()));
 			myOrder.setDue_in_days((int)Math.floor(1 + 10 * rand.nextFloat()));
 			
-			System.out.println("\n" + "-> " + myAgent.getLocalName() + ": ");
-			System.out.println("   * " + "Generating order...");
-			System.out.println("   * " + myOrder.toString());
+			System.out.println(
+					"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+					"   * " + "Generating order..." + "\n" +
+					"   * " + myOrder.toString()
+							);
 		}
 		
 	}
@@ -249,7 +251,10 @@ public class CustomerAgent extends Agent {
 			try {
 				getContentManager().fillContent(msg, request);
 				send(msg);
-				System.out.println("   * " + "Order sent." + "\n");
+				System.out.println(
+						"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+						"   * " + "Order sent." + "\n"
+								);
 			}
 			catch (CodecException ce) {
 				ce.printStackTrace();

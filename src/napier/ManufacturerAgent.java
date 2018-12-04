@@ -132,7 +132,6 @@ public class ManufacturerAgent extends Agent {
 			e.printStackTrace();
 		}
 		
-		addBehaviour(new ReceiveAndForwardCustumerOrders(this));
 		addBehaviour(new TickerWaiter(this));
 		
 	}
@@ -247,9 +246,11 @@ public class ManufacturerAgent extends Agent {
 						ContentElement ce = null;
 						
 						// Print out the message content in SL
-						System.out.println("-> " + myAgent.getLocalName() + ": ");
-						System.out.println("   * " + "Message received from " + msg.getSender().getLocalName());
-						System.out.println("   * " + "Content: " + msg.getContent());
+//						System.out.println(
+//								"-> " + myAgent.getLocalName() + ": " +
+//								"   * " + "Message received from " + msg.getSender().getLocalName() +
+//								"   * " + "Content: " + msg.getContent()
+//								);
 
 						ce = getContentManager().extractContent(msg);
 						if(ce instanceof Action) {
@@ -265,17 +266,17 @@ public class ManufacturerAgent extends Agent {
 									// Set current supplier to potentially order from [s1, s2, s3]
 									Integer sup_num = calcCurrentSupplier(order);
 									AID current_supplier_AID = supplierAgents.get(sup_num - 1);
-									System.out.println("   * " + "Current supplier: " + sup_num);
+//									System.out.println("   * " + "Current supplier: " + sup_num);
 									
 									// calculate the minimum cost from current set supplier
 									Integer current_min_cost = calcMinCostFromSupOrder(sup_num, order);
-									System.out.println("   * " + "Cost: " + current_min_cost);
+//									System.out.println("   * " + "Cost: " + current_min_cost);
 									
 									Integer days_in_warehouse = order.getDue_in_days() - deliver_in_days.get(sup_num-1);
-									System.out.println("   * " + "Days in warehouse: " + days_in_warehouse);
+//									System.out.println("   * " + "Days in warehouse: " + days_in_warehouse);
 									
 									Integer profit_on_single_order = order.getPrice() - current_min_cost;
-									System.out.println("   * " + "Profit on single order: " + profit_on_single_order);
+//									System.out.println("   * " + "Profit on single order: " + profit_on_single_order);
 									
 									// If Manufacturer already have components in stock then:
 									if (profit_on_single_order > 0) { // If profit is positive
@@ -300,7 +301,16 @@ public class ManufacturerAgent extends Agent {
 												getContentManager().fillContent(sup_msg, request);
 												send(sup_msg);
 												
-												System.out.println("   * " + "Forwarding order to supplier: " + sup_num);
+												System.out.println(
+														"-> " + myAgent.getLocalName() + ": " + "\n" +
+														"   * " + "Message received from " + msg.getSender().getLocalName() + "\n" +
+														"   * " + "Content: " + msg.getContent() + "\n" +
+														"   * " + "Current supplier: " + sup_num + "\n" +
+														"   * " + "Cost: " + current_min_cost + "\n" +
+														"   * " + "Days in warehouse: " + days_in_warehouse + "\n" +
+														"   * " + "Profit on single order: " + profit_on_single_order + "\n" +
+														"   * " + "Forwarding order to supplier: " + sup_num
+														);
 											}
 											catch (CodecException _ce) {
 												_ce.printStackTrace();
@@ -327,8 +337,10 @@ public class ManufacturerAgent extends Agent {
 				}
 				else {
 					//put the behaviour to sleep until a message arrives
-					System.out.println("\n" + "-> " + myAgent.getLocalName());
-					System.out.println("   * " + "Waiting for a message...");
+					System.out.println(
+							"\n" + "-> " + myAgent.getLocalName() + "\n" +
+									"   * " + "Waiting for a message..."
+					);
 					block();
 				}
 			}
@@ -354,7 +366,7 @@ public class ManufacturerAgent extends Agent {
 		
 	}
 	
-	public class ReceiveSupply extends OneShotBehaviour {
+	public class ReceiveSupply extends CyclicBehaviour {
 		
 		public ReceiveSupply(Agent agent) {
 			super(agent);
@@ -363,9 +375,7 @@ public class ManufacturerAgent extends Agent {
 		@Override
 		public void action() {
 			
-//			for (int i =0; i < expected_messages.length; i++) {
-//				
-//			}
+			System.out.println(myAgent.getLocalName() + " is receiving SUPPLY...");
 			
 		}
 		
