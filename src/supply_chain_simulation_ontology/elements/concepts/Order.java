@@ -26,7 +26,6 @@ public class Order implements Concept {
 	}
 	
 	// Getters and Setters
-	
 	@Slot ( mandatory = true )
 	public AID getBuyer() {
 		return buyer;

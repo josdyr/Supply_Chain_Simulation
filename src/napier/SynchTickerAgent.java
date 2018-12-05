@@ -36,7 +36,8 @@ public class SynchTickerAgent extends Agent {
 		
 		// Make sure all agents have started
 		System.out.println("Waiting to make sure all agents get enrolled...");
-		doWait(1000);
+		doWait(1000); // Sniffer version
+		doWait(1000); // Non-sniffer version
 		
 		System.out.println("\n\n" + "=== Starting simulation ===" + "\n");
 		

@@ -8,7 +8,7 @@ import supply_chain_simulation_ontology.elements.concepts.comps.Desktop_Motherbo
 
 public class Desktop extends PC {
 	
-public ArrayList<Comp> pc_components = new ArrayList<Comp>();
+	public ArrayList<Comp> pc_components = new ArrayList<Comp>();
 	
 	// Constructor
 	public Desktop() {

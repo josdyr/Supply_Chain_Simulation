@@ -8,8 +8,8 @@ public class Delivery {
 	PC myPC;
 	
 	// Not Mandatory
-	Integer deliver_in_days;
-	Integer total_cost;
+	private Integer deliver_in_days;
+	private Integer total_cost;
 
 	@Override
 	public String toString() {
@@ -17,7 +17,6 @@ public class Delivery {
 	}
 
 	// Getters and Setters
-	
 	@Slot ( mandatory = true )
 	public PC getMyPC() {
 		return myPC;
