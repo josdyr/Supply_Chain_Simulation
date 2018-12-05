@@ -51,6 +51,7 @@ public class ManufacturerAgent extends Agent {
 	ArrayList<HashMap<String, Integer>> suppliers_info = new ArrayList<HashMap<String, Integer>>();
 	ArrayList<Integer> deliver_in_days = new ArrayList<>();
 	HashMap<Integer, Integer> expected_messages = new HashMap<>();
+	Integer total_profit = 0;
 	
 	Buy buy;
 	
@@ -262,17 +263,11 @@ public class ManufacturerAgent extends Agent {
 									// Set current supplier to potentially order from [s1, s2, s3]
 									Integer sup_num = calcCurrentSupplier(order);
 									AID current_supplier_AID = supplierAgents.get(sup_num - 1);
-//									System.out.println("   * " + "Current supplier: " + sup_num);
 									
 									// calculate the minimum cost from current set supplier
 									Integer current_min_cost = calcMinCostFromSupOrder(sup_num, order);
-//									System.out.println("   * " + "Cost: " + current_min_cost);
-									
 									Integer days_in_warehouse = order.getDue_in_days() - deliver_in_days.get(sup_num-1);
-//									System.out.println("   * " + "Days in warehouse: " + days_in_warehouse);
-									
 									Integer profit_on_single_order = order.getPrice() - current_min_cost;
-//									System.out.println("   * " + "Profit on single order: " + profit_on_single_order);
 									
 									// If Manufacturer already have components in stock then:
 									if (profit_on_single_order > 0) { // If profit is positive
@@ -281,6 +276,10 @@ public class ManufacturerAgent extends Agent {
 										} else { // Components not in stock
 											// forward order to supplier
 											// Prepare receiving template
+											Integer current_profit = 0;
+											current_profit = (profit_on_single_order * order.getQuantity());
+											total_profit += current_profit;
+											
 											ACLMessage sup_msg = new ACLMessage(ACLMessage.REQUEST);
 											sup_msg.addReceiver(current_supplier_AID);
 											sup_msg.setLanguage(codec.getName());
@@ -305,7 +304,9 @@ public class ManufacturerAgent extends Agent {
 														"   * " + "Cost: " + current_min_cost + "\n" +
 														"   * " + "Days in warehouse: " + days_in_warehouse + "\n" +
 														"   * " + "Profit on single order: " + profit_on_single_order + "\n" +
-														"   * " + "Forwarding order to supplier: " + sup_num
+														"   * " + "Profit on current order: " + "sng_ord_" + profit_on_single_order + " * " + "qty_" + order.getQuantity() + " = " + current_profit + "\n" +
+														"   * " + "Profit: " + total_profit + "\n" +
+														"   * " + "Forwarding order to supplier: " + sup_num + "\n"
 														);
 											}
 											catch (CodecException _ce) {
