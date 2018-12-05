@@ -161,7 +161,9 @@ public class SynchTickerAgent extends Agent {
 					msg.addReceiver(agent);
 				}
 				myAgent.send(msg);
+				doWait(500);
 				myAgent.doDelete();
+				System.out.println("\n\n" + "=== Simulation Ended ===" + "\n");
 			}
 			else {
 				reset();

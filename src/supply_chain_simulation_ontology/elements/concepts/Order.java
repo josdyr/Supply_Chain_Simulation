@@ -5,12 +5,12 @@ import java.util.Random;
 
 import jade.content.AgentAction;
 import jade.content.Concept;
+import jade.content.onto.annotations.Slot;
 import jade.core.AID;
 
 public class Order implements Concept {
 	
 	private AID buyer;
-	private AID seller;
 
 	private PC myPC;
 	
@@ -26,6 +26,8 @@ public class Order implements Concept {
 	}
 	
 	// Getters and Setters
+	
+	@Slot ( mandatory = true )
 	public AID getBuyer() {
 		return buyer;
 	}
@@ -33,15 +35,8 @@ public class Order implements Concept {
 	public void setBuyer(AID buyer) {
 		this.buyer = buyer;
 	}
-	
-	public AID getSeller() {
-		return seller;
-	}
 
-	public void setSeller(AID seller) {
-		this.seller = seller;
-	}
-
+	@Slot ( mandatory = true )
 	public PC getMyPC() {
 		return myPC;
 	}
@@ -50,6 +45,7 @@ public class Order implements Concept {
 		this.myPC = myPC;
 	}
 
+	@Slot ( mandatory = true )
 	public int getQuantity() {
 		return quantity;
 	}
@@ -58,6 +54,7 @@ public class Order implements Concept {
 		this.quantity = quantity;
 	}
 
+	@Slot ( mandatory = true )
 	public int getPrice() {
 		return price;
 	}
@@ -66,6 +63,7 @@ public class Order implements Concept {
 		this.price = price;
 	}
 
+	@Slot ( mandatory = true )
 	public int getTotal_price() {
 		return total_price;
 	}
@@ -74,6 +72,7 @@ public class Order implements Concept {
 		this.total_price = total_price;
 	}
 
+	@Slot ( mandatory = true )
 	public int getDue_in_days() {
 		return due_in_days;
 	}

@@ -278,7 +278,7 @@ public class CustomerAgent extends Agent {
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(tickerAgent);
 			msg.setContent("done");
-			doWait(3000);
+			doWait(400);
 			myAgent.send(msg);
 			
 //			//send a message to each seller that we have finished

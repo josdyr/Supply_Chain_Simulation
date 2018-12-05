@@ -101,7 +101,8 @@ public class SupplierAgent extends Agent {
 		@Override
 		public void action() {
 			// Wait for new daily message
-			MessageTemplate mt = MessageTemplate.MatchContent("new day");
+//			MessageTemplate mt = MessageTemplate.MatchContent("new day");
+			MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchContent("new day"), MessageTemplate.MatchContent("terminate"));
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				if (tickerAgent == null) {
@@ -115,7 +116,7 @@ public class SupplierAgent extends Agent {
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					
 					//sub-behaviours will execute in the order they are added
-					doWait(2000); // Hardcode a timer to wait for the first message
+//					doWait(2000); // Hardcode a timer to wait for the first message
 //					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
 					dailyActivity.addSubBehaviour(new SenderBehaviour(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
@@ -247,6 +248,7 @@ public class SupplierAgent extends Agent {
 					Action inform = new Action();
 					Supply supply = new Supply();
 					supply.setDelivery(current_delivery);
+					supply.setReceiver(manufacturer_AID);
 					inform.setAction(supply);
 					inform.setActor(manufacturer_AID);
 					

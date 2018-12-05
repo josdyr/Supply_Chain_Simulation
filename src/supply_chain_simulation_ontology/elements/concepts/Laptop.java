@@ -2,6 +2,8 @@ package supply_chain_simulation_ontology.elements.concepts;
 
 import java.util.ArrayList;
 
+import jade.content.onto.annotations.AggregateSlot;
+import jade.content.onto.annotations.Slot;
 import supply_chain_simulation_ontology.elements.concepts.comps.Laptop_CPU;
 import supply_chain_simulation_ontology.elements.concepts.comps.Laptop_Motherboard;
 import supply_chain_simulation_ontology.elements.concepts.comps.Screen;
@@ -28,6 +30,7 @@ public class Laptop extends PC {
 		return "Laptop [pc_components=" + pc_components + "]";
 	}
 
+	@AggregateSlot ( cardMin = 6)
 	public ArrayList<Comp> getPc_components() {
 		return pc_components;
 	}

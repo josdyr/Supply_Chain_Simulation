@@ -2,6 +2,7 @@ package supply_chain_simulation_ontology.elements.concepts;
 
 import java.util.ArrayList;
 
+import jade.content.onto.annotations.AggregateSlot;
 import supply_chain_simulation_ontology.elements.concepts.comps.Desktop_CPU;
 import supply_chain_simulation_ontology.elements.concepts.comps.Desktop_Motherboard;
 
@@ -27,6 +28,7 @@ public ArrayList<Comp> pc_components = new ArrayList<Comp>();
 	}
 	
 	// Getters and Setters
+	@AggregateSlot ( cardMin = 5)
 	public ArrayList<Comp> getPc_components() {
 		return pc_components;
 	}

@@ -159,7 +159,8 @@ public class ManufacturerAgent extends Agent {
 		@Override
 		public void action() {
 			// Wait for new daily message
-			MessageTemplate mt = MessageTemplate.MatchContent("new day");
+//			MessageTemplate mt = MessageTemplate.MatchContent("new day");
+			MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchContent("new day"), MessageTemplate.MatchContent("terminate"));
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				if (tickerAgent == null) {
@@ -184,7 +185,7 @@ public class ManufacturerAgent extends Agent {
 //					addBehaviour(new ReceiveSupply(myAgent));
 					
 					// Wait a bit only the first day in order to receive the first message
-					doWait(1000);
+					doWait(500);
 					
 				}
 				else {
@@ -302,10 +303,10 @@ public class ManufacturerAgent extends Agent {
 														"   * " + "Content: " + msg.getContent() + "\n" +
 														"   * " + "Current supplier: " + sup_num + "\n" +
 														"   * " + "Cost: " + current_min_cost + "\n" +
-														"   * " + "Days in warehouse: " + days_in_warehouse + "\n" +
+														"   * " + "Days in warehouse: " + days_in_warehouse + " <- (supply on demand. can be shipped right away)" + "\n" +
 														"   * " + "Profit on single order: " + profit_on_single_order + "\n" +
 														"   * " + "Profit on current order: " + "sng_ord_" + profit_on_single_order + " * " + "qty_" + order.getQuantity() + " = " + current_profit + "\n" +
-														"   * " + "Profit: " + total_profit + "\n" +
+														"   * " + "Profit accumulated: £" + total_profit + "\n" +
 														"   * " + "Forwarding order to supplier: " + sup_num + "\n"
 														);
 											}
@@ -380,10 +381,7 @@ public class ManufacturerAgent extends Agent {
 				
 				// = Process the message =
 				
-				System.out.println(myAgent.getLocalName() + " reveived supply from: " + msg.getSender());
-				
 				try {
-					doWait(500);
 					ContentElement ce = null;
 
 					// Let JADE convert from String to Java objects
