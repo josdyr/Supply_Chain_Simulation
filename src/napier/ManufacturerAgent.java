@@ -306,7 +306,7 @@ public class ManufacturerAgent extends Agent {
 														"   * " + "Days in warehouse: " + days_in_warehouse + " <- (supply on demand. can be shipped right away)" + "\n" +
 														"   * " + "Profit on single order: " + profit_on_single_order + "\n" +
 														"   * " + "Profit on current order: " + "sng_ord_" + profit_on_single_order + " * " + "qty_" + order.getQuantity() + " = " + current_profit + "\n" +
-														"   * " + "Profit accumulated: £" + total_profit + "\n" +
+														"   * " + "Profit accumulated: " + total_profit + "\n" +
 														"   * " + "Forwarding order to supplier: " + sup_num + "\n"
 														);
 											}
