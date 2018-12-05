@@ -382,6 +382,7 @@ public class ManufacturerAgent extends Agent {
 				System.out.println(myAgent.getLocalName() + " reveived supply from: " + msg.getSender());
 				
 				try {
+					doWait(500);
 					ContentElement ce = null;
 
 					// Let JADE convert from String to Java objects

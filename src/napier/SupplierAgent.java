@@ -180,11 +180,15 @@ public class SupplierAgent extends Agent {
 								if (all_deliveries_queue.containsKey(delivery_day)) {
 									// Amend Daily List
 									daily_list = all_deliveries_queue.get(delivery_day);
-									daily_list.add(new Delivery(order.getMyPC()));
+									Delivery delivery = new Delivery();
+									delivery.setMyPC(order.getMyPC());
+									daily_list.add(delivery);
 									all_deliveries_queue.put(delivery_day, daily_list);
 								} else {
 									// Make a new Daily List
-									daily_list.add(new Delivery(order.getMyPC()));
+									Delivery delivery = new Delivery();
+									delivery.setMyPC(order.getMyPC());
+									daily_list.add(delivery);
 									all_deliveries_queue.put(delivery_day, daily_list);
 								}
 								

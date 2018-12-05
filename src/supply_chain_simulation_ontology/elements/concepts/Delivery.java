@@ -7,10 +7,10 @@ public class Delivery {
 	
 	PC myPC;
 
-	public Delivery(PC myPC) {
-		super();
-		this.myPC = myPC;
-	}
+//	public Delivery(PC myPC) {
+//		super();
+//		this.myPC = myPC;
+//	}
 
 	@Override
 	public String toString() {
