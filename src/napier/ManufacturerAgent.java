@@ -262,18 +262,18 @@ public class ManufacturerAgent extends Agent {
 									// == Calculate if manufacturer will gain profit on current order or not ==
 									
 									// Set current supplier to potentially order from [s1, s2, s3]
-									Integer sup_num = calcCurrentSupplier(order);
+									Integer sup_num = calcBestSupplier(order);
 									AID current_supplier_AID = supplierAgents.get(sup_num - 1);
 									
 									// calculate the minimum cost from current set supplier
 									Integer current_min_cost = calcMinCostFromSupOrder(sup_num, order);
-									Integer days_in_warehouse = order.getDue_in_days() - deliver_in_days.get(sup_num-1);
+									Integer days_in_warehouse = order.getDue_in_days() - deliver_in_days.get(sup_num-1); // Will not be used to calc total profit
 									Integer profit_on_single_order = order.getPrice() - current_min_cost;
 									
 									// If Manufacturer already have components in stock then:
 									if (profit_on_single_order > 0) { // If profit is positive
 										if (false) { // Components are in stock
-											System.out.println("TODO: COMPONENTS ALREADY IN STOCK...");
+											System.out.println("TODO: COMPONENTS ALREADY IN STOCK..."); // This will never happen (buy-on-demand)
 										} else { // Components not in stock
 											// forward order to supplier
 											// Prepare receiving template
@@ -297,6 +297,8 @@ public class ManufacturerAgent extends Agent {
 												getContentManager().fillContent(sup_msg, request);
 												send(sup_msg);
 												
+												// TODO: send ACCEPT REQUEST msg back to customer.
+												
 												System.out.println(
 														"-> " + myAgent.getLocalName() + ": " + "\n" +
 														"   * " + "Message received from " + msg.getSender().getLocalName() + "\n" +
@@ -319,6 +321,7 @@ public class ManufacturerAgent extends Agent {
 										}
 									} else {
 										System.out.println("   * " + "Not an acceptable order. Price offered is too low.");
+										// TODO: send REFUSE msg back to customer.
 									}
 									
 								}
@@ -344,7 +347,7 @@ public class ManufacturerAgent extends Agent {
 			}
 		}
 
-		public Integer calcCurrentSupplier(Order order) {
+		public Integer calcBestSupplier(Order order) {
 			if (order.getDue_in_days() >= 7) { // s3
 				return 3;
 			} else if (order.getDue_in_days() >= 3) { // s2

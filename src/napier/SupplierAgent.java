@@ -78,7 +78,7 @@ public class SupplierAgent extends Agent {
 		}
 		
 		addBehaviour(new TickerWaiter(this));
-		addBehaviour(new ReceiveRequest(this));
+		addBehaviour(new ReceiveBuyRequest(this));
 		
 	}
 	
@@ -118,7 +118,7 @@ public class SupplierAgent extends Agent {
 					//sub-behaviours will execute in the order they are added
 //					doWait(2000); // Hardcode a timer to wait for the first message
 //					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
-					dailyActivity.addSubBehaviour(new SenderBehaviour(myAgent));
+					dailyActivity.addSubBehaviour(new DeliverSupply(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
 					//enroll the subBehaviours of the SequentialBehaviour: "dailyActivity-Behaviour". ("list")
@@ -139,9 +139,9 @@ public class SupplierAgent extends Agent {
 		
 	}
 	
-	public class ReceiveRequest extends CyclicBehaviour {
+	public class ReceiveBuyRequest extends CyclicBehaviour {
 
-		public ReceiveRequest(Agent agent) {
+		public ReceiveBuyRequest(Agent agent) {
 			super(agent);
 		}
 		
@@ -225,9 +225,9 @@ public class SupplierAgent extends Agent {
 	}
 	
 	//create a cyclic behaviour
-	public class SenderBehaviour extends OneShotBehaviour {
+	public class DeliverSupply extends OneShotBehaviour {
 		
-		public SenderBehaviour(Agent agent) {
+		public DeliverSupply(Agent agent) {
 			super(agent);
 		}
 		
@@ -248,6 +248,9 @@ public class SupplierAgent extends Agent {
 					Action inform = new Action();
 					Supply supply = new Supply();
 					supply.setDelivery(current_delivery);
+					
+					// TODO: remove current_delivery from list.
+					
 					supply.setReceiver(manufacturer_AID);
 					inform.setAction(supply);
 					inform.setActor(manufacturer_AID);
