@@ -11,7 +11,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-public class SynchTickerAgent extends Agent {
+public class SynchDaysAgent extends Agent {
 	
 	public static final int NUM_DAYS = 90;
 	
@@ -36,8 +36,9 @@ public class SynchTickerAgent extends Agent {
 		
 		// Make sure all agents have started
 		System.out.println("Waiting to make sure all agents get enrolled...");
-		doWait(1000); // Sniffer version
-		doWait(1000); // Non-sniffer version
+		
+//		doWait(40000); // Sniffer version
+		doWait(2000); // Non-sniffer version
 		
 		System.out.println("\n\n" + "=== Starting simulation ===" + "\n");
 		

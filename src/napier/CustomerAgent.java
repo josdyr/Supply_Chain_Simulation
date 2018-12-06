@@ -80,7 +80,7 @@ public class CustomerAgent extends Agent {
 			e.printStackTrace();
 		}
 		
-		addBehaviour(new TickerWaiter(this));
+		addBehaviour(new StartBehaviours(this));
 		
 	}
 	
@@ -93,10 +93,10 @@ public class CustomerAgent extends Agent {
 		}
 	}
 	
-	public class TickerWaiter extends CyclicBehaviour {
+	public class StartBehaviours extends CyclicBehaviour {
 		
 		//behaviour to wait for a new day
-		public TickerWaiter(Agent a) {
+		public StartBehaviours(Agent a) {
 			super(a);
 		}
 		

@@ -30,7 +30,7 @@ public class Application {
 			rma.start();
 
 			// SynchTickerAgent
-			AgentController SynchTickerAgent = myContainer.createNewAgent("mySynchTickerAgent", SynchTickerAgent.class.getCanonicalName(), null);
+			AgentController SynchTickerAgent = myContainer.createNewAgent("mySynchTickerAgent", SynchDaysAgent.class.getCanonicalName(), null);
 			SynchTickerAgent.start();
 
 			// Spin off SupplierAgents
