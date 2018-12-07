@@ -434,7 +434,12 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 			
 			//try to receive a message
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			MessageTemplate mt =
+					MessageTemplate.and(
+							MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+							MessageTemplate.MatchSender(mySupplierAgentAID)
+							);
+//			mt.MatchSender(mySupplierAgentAID);
 			ACLMessage msg = myAgent.receive(mt);
 			
 			if (msg != null) {
