@@ -245,6 +245,7 @@ public class ManufacturerAgent extends Agent {
 		
 		@Override
 		public void action() {
+			
 			for (int i = 0; i < 3; i++) {
 				//try to receive a message
 				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
@@ -285,7 +286,10 @@ public class ManufacturerAgent extends Agent {
 											// Prepare receiving template
 											Integer current_profit = 0;
 											current_profit = (profit_on_single_order * order.getQuantity());
-											total_profit += current_profit;
+											
+											if (day <= 90) {
+												total_profit += current_profit;
+											}
 											
 											ACLMessage sup_msg = new ACLMessage(ACLMessage.REQUEST);
 											sup_msg.addReceiver(current_supplier_AID);

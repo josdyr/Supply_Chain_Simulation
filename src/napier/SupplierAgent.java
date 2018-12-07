@@ -76,7 +76,7 @@ public class SupplierAgent extends Agent {
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
-		
+		doWait(2000);
 		addBehaviour(new TickerWaiter(this));
 		addBehaviour(new ReceiveBuyRequest(this));
 		
@@ -116,8 +116,8 @@ public class SupplierAgent extends Agent {
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					
 					//sub-behaviours will execute in the order they are added
-//					doWait(2000); // Hardcode a timer to wait for the first message
-//					dailyActivity.addSubBehaviour(new ReceiverBehaviour(myAgent));
+					
+					
 					dailyActivity.addSubBehaviour(new DeliverSupply(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					
@@ -178,7 +178,7 @@ public class SupplierAgent extends Agent {
 								Integer delivery_day = day + deliver_in_days.get(sup_num-1);
 								ArrayList<Delivery> daily_list = new ArrayList<Delivery>();
 								
-								if (delivery_day <= 90) { // If delivery day is less than or equal to 90
+								if (delivery_day <= 90) { // If delivery day is less than or equal to 90: add delivery to list.
 									if (all_deliveries_queue.containsKey(delivery_day)) {
 										// Amend Daily List
 										daily_list = all_deliveries_queue.get(delivery_day);
@@ -204,7 +204,9 @@ public class SupplierAgent extends Agent {
 											"   * " + "Delivery to " + msg.getSender().getLocalName() + " is on day: " + delivery_day + "\n" +
 											"   * " + "Delivery to myCustomerAgent is on day: " + (day+order.getDue_in_days())
 									);	
-								}							
+								} else {
+									System.out.println("\n" + "-> " + myAgent.getLocalName() + ": " + "!!!!!!!! ORDER_NOT_ADDED");
+								}
 							}
 						}
 					}

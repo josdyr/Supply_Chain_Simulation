@@ -88,7 +88,7 @@ public class CustomerAgent extends Agent {
 		}
 		
 		addBehaviour(new ReceiveReceipt(this));
-//		addBehaviour(new ReceiveOrder(this));
+		addBehaviour(new ReceiveOrder(this));
 		addBehaviour(new StartBehaviours(this));
 		
 	}
@@ -195,6 +195,59 @@ public class CustomerAgent extends Agent {
 							);
 				block();
 			}
+		}
+		
+	}
+	
+	public class ReceiveOrder extends CyclicBehaviour {
+		
+		public ReceiveOrder(Agent agent) {
+			super(agent);
+		}
+		
+		@Override
+		public void action() {
+			
+			//try to receive a message
+			MessageTemplate mt =
+					MessageTemplate.and(
+							MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+							MessageTemplate.MatchSender(myManufacturerAgentAID)
+							);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				
+				try {
+					ContentElement ce = null;
+					ce = getContentManager().extractContent(msg);
+					if(ce instanceof Action) {
+						Concept action = ((Action)ce).getAction();
+						if (action instanceof DeliverOrder) {
+							DeliverOrder order = (DeliverOrder)action;
+							PC pc = order.getMyPC();
+							if (pc instanceof PC) {
+								// Print out received PC
+								System.out.println("-> " + myAgent.getLocalName() + " ORDER_SUCCESS" +  ": " + pc.toString());
+							}
+						}
+					}
+				}
+				catch (CodecException ce) {
+					ce.printStackTrace();
+				}
+				catch (OntologyException oe) {
+					oe.printStackTrace();
+				}
+				
+			} else {
+				//put the behaviour to sleep until a message arrives
+				System.out.println(
+						"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+						"   * " + "Waiting for message..."
+							);
+				block();
+			}
+			
 		}
 		
 	}
@@ -325,56 +378,6 @@ public class CustomerAgent extends Agent {
 		
 	}
 	
-	public class ReceiveOrder extends CyclicBehaviour {
-		
-		public ReceiveOrder(Agent agent) {
-			super(agent);
-		}
-		
-		@Override
-		public void action() {
-			
-			//try to receive a message
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-			ACLMessage msg = myAgent.receive(mt);
-			
-			if (msg != null) {
-				
-				try {
-					ContentElement ce = null;
-					ce = getContentManager().extractContent(msg);
-					if(ce instanceof Action) {
-						Concept action = ((Action)ce).getAction();
-						if (action instanceof DeliverOrder) {
-							DeliverOrder order = (DeliverOrder)action;
-							PC pc = order.getMyPC();
-							if (pc instanceof PC) {
-								// Print out received PC
-								System.out.println("-> " + myAgent.getLocalName() + ": " + pc.toString());
-							}
-						}
-					}
-				}
-				catch (CodecException ce) {
-					ce.printStackTrace();
-				}
-				catch (OntologyException oe) {
-					oe.printStackTrace();
-				}
-				
-			} else {
-				//put the behaviour to sleep until a message arrives
-				System.out.println(
-						"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
-						"   * " + "Waiting for message..."
-							);
-				block();
-			}
-			
-		}
-		
-	}
-	
 	public class EndDay extends OneShotBehaviour {
 		
 		public EndDay(Agent a) {
@@ -386,7 +389,7 @@ public class CustomerAgent extends Agent {
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(tickerAgent);
 			msg.setContent("done");
-			doWait(400);
+			doWait(500);
 			myAgent.send(msg);
 		}
 		
