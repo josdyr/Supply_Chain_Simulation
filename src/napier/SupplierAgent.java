@@ -178,29 +178,33 @@ public class SupplierAgent extends Agent {
 								Integer delivery_day = day + deliver_in_days.get(sup_num-1);
 								ArrayList<Delivery> daily_list = new ArrayList<Delivery>();
 								
-								if (all_deliveries_queue.containsKey(delivery_day)) {
-									// Amend Daily List
-									daily_list = all_deliveries_queue.get(delivery_day);
-									Delivery delivery = new Delivery();
-									delivery.setMyPC(order.getMyPC());
-									daily_list.add(delivery);
-									all_deliveries_queue.put(delivery_day, daily_list);
-								} else {
-									// Make a new Daily List
-									Delivery delivery = new Delivery();
-									delivery.setMyPC(order.getMyPC());
-									daily_list.add(delivery);
-									all_deliveries_queue.put(delivery_day, daily_list);
-								}
-								
-								System.out.println(
-										"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
-										"   * " + "Message received from " + msg.getSender() + "\n" +
-										"   * " + "Content: " + msg.getContent() + "\n" +
-										"   * " + "Delivery added to queue." + "\n" +
-										"   * " + "Delivery to " + msg.getSender().getLocalName() + " is on day: " + delivery_day + "\n" +
-										"   * " + "Delivery to myCustomerAgent is on day: " + (day+order.getDue_in_days())
-								);								
+								if (delivery_day <= 90) { // If delivery day is less than or equal to 90
+									if (all_deliveries_queue.containsKey(delivery_day)) {
+										// Amend Daily List
+										daily_list = all_deliveries_queue.get(delivery_day);
+										Delivery delivery = new Delivery();
+										delivery.setMyPC(order.getMyPC());
+										delivery.setReceiver(order.getBuyer());
+										daily_list.add(delivery);
+										all_deliveries_queue.put(delivery_day, daily_list);
+									} else {
+										// Make a new Daily List
+										Delivery delivery = new Delivery();
+										delivery.setMyPC(order.getMyPC());
+										delivery.setReceiver(order.getBuyer());
+										daily_list.add(delivery);
+										all_deliveries_queue.put(delivery_day, daily_list);
+									}
+									
+									System.out.println(
+											"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+											"   * " + "Message received from " + msg.getSender() + "\n" +
+											"   * " + "Content: " + msg.getContent() + "\n" +
+											"   * " + "Delivery added to queue." + "\n" +
+											"   * " + "Delivery to " + msg.getSender().getLocalName() + " is on day: " + delivery_day + "\n" +
+											"   * " + "Delivery to myCustomerAgent is on day: " + (day+order.getDue_in_days())
+									);	
+								}							
 							}
 						}
 					}
@@ -235,6 +239,7 @@ public class SupplierAgent extends Agent {
 		public void action() {
 			
 			if (all_deliveries_queue.containsKey(day)) {
+				
 				for (Delivery current_delivery : all_deliveries_queue.get(day)) {
 					
 					// Deliver a msg(Supply(Delivery(PC())))
@@ -251,7 +256,6 @@ public class SupplierAgent extends Agent {
 					
 					// TODO: remove current_delivery from list.
 					
-					supply.setReceiver(manufacturer_AID);
 					inform.setAction(supply);
 					inform.setActor(manufacturer_AID);
 					

@@ -36,6 +36,9 @@ import jade.lang.acl.MessageTemplate;
 
 import supply_chain_simulation_ontology.ECommerceOntology;
 import supply_chain_simulation_ontology.elements.actions.Buy;
+import supply_chain_simulation_ontology.elements.actions.ConfirmOrder;
+import supply_chain_simulation_ontology.elements.actions.DeliverOrder;
+import supply_chain_simulation_ontology.elements.actions.RefuseOrder;
 import supply_chain_simulation_ontology.elements.actions.Supply;
 import supply_chain_simulation_ontology.elements.concepts.Comp;
 import supply_chain_simulation_ontology.elements.concepts.Delivery;
@@ -54,6 +57,9 @@ public class ManufacturerAgent extends Agent {
 	Integer total_profit = 0;
 	
 	Buy buy;
+	RefuseOrder refuseOrder;
+	ConfirmOrder confirmOrder;
+//	DeliverOrder deliverOrder;
 	
 	private int totalValueOfOrdersShipped;
 	private int penaltyForLateOrders;
@@ -290,14 +296,13 @@ public class ManufacturerAgent extends Agent {
 											Action request = new Action();
 											buy = new Buy();
 											buy.setOrder(order);
+											buy.setCustomer_buyer(order.getBuyer());
 											request.setAction(buy);
 											request.setActor(current_supplier_AID);
 											
 											try {
 												getContentManager().fillContent(sup_msg, request);
 												send(sup_msg);
-												
-												// TODO: send ACCEPT REQUEST msg back to customer.
 												
 												System.out.println(
 														"-> " + myAgent.getLocalName() + ": " + "\n" +
@@ -318,12 +323,60 @@ public class ManufacturerAgent extends Agent {
 											catch (OntologyException oe) {
 												oe.printStackTrace();
 											}
+											
+											
+											// Send CONFIRM message back to customer.
+											ACLMessage cust_msg = new ACLMessage(ACLMessage.CONFIRM);
+											cust_msg.addReceiver(order.getBuyer()); // set customer as the receiver
+											cust_msg.setLanguage(codec.getName());
+											cust_msg.setOntology(ontology.getName());
+											
+											// Action Wrapper
+											Action confirm = new Action();
+											confirmOrder = new ConfirmOrder(); // Make a confirm order
+											confirmOrder.setOrder(order);
+											confirm.setAction(confirmOrder);
+											confirm.setActor(order.getBuyer()); // Set customer as the actor
+											
+											try {
+												getContentManager().fillContent(cust_msg, confirm);
+												send(cust_msg);
+												System.out.println("-> " + myAgent.getLocalName() + ": CONFIRM: Will deliver to you in " + deliver_in_days.get(sup_num-1) + " days...");
+											}
+											catch (CodecException _ce) {
+												_ce.printStackTrace();
+											}
+											catch (OntologyException oe) {
+												oe.printStackTrace();
+											}
+											
+											
 										}
-									} else {
-										System.out.println("   * " + "Not an acceptable order. Price offered is too low.");
-										// TODO: send REFUSE msg back to customer.
+									} else { // Send REFUSE back to customer
+										ACLMessage cust_msg = new ACLMessage(ACLMessage.REFUSE);
+										cust_msg.addReceiver(order.getBuyer()); // set customer as the receiver
+										cust_msg.setLanguage(codec.getName());
+										cust_msg.setOntology(ontology.getName());
+										
+										// Action Wrapper
+										Action refuse = new Action();
+										refuseOrder = new RefuseOrder(); // Make a refuse order
+										refuseOrder.setOrder(order);
+										refuse.setAction(refuseOrder);
+										refuse.setActor(order.getBuyer()); // Set customer as the actor
+										
+										try {
+											getContentManager().fillContent(cust_msg, refuse);
+											send(cust_msg);
+											System.out.println("-> " + myAgent.getLocalName() + ": REFUSE: Not an acceptable order. Price offered is too low.");
+										}
+										catch (CodecException _ce) {
+											_ce.printStackTrace();
+										}
+										catch (OntologyException oe) {
+											oe.printStackTrace();
+										}
 									}
-									
 								}
 							}
 						}
@@ -401,6 +454,30 @@ public class ManufacturerAgent extends Agent {
 								// == Process message ==
 								// formality: receive physical supply INFORM msg (processing already done in ReceiveAndForwardCustumerOrders behaviour...)
 								// TODO: forward PC back to original customer
+								ACLMessage cust_msg = new ACLMessage(ACLMessage.INFORM);
+								cust_msg.addReceiver(delivery.getReceiver()); // set customer as the receiver
+								cust_msg.setLanguage(codec.getName());
+								cust_msg.setOntology(ontology.getName());
+								
+								// Action Wrapper
+								Action receipt = new Action();
+								DeliverOrder deliverOrder = new DeliverOrder();
+								deliverOrder.setMyPC(currentPC);
+								receipt.setAction(deliverOrder); // Send the delivery back to the customer
+								receipt.setActor(delivery.getReceiver()); // Set customer as the actor
+								
+								try {
+									getContentManager().fillContent(cust_msg, receipt);
+									send(cust_msg);
+									System.out.println("-> " + myAgent.getLocalName() + ": INFORM: Order delivered.");
+								}
+								catch (CodecException _ce) {
+									_ce.printStackTrace();
+								}
+								catch (OntologyException oe) {
+									oe.printStackTrace();
+								}
+								
 								// TODO: receive physical payment from original customer
 								
 							}

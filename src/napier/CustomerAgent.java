@@ -3,6 +3,8 @@ package napier;
 import java.util.ArrayList;
 import java.util.Random;
 
+import jade.content.Concept;
+import jade.content.ContentElement;
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SLCodec;
@@ -22,6 +24,11 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import supply_chain_simulation_ontology.ECommerceOntology;
 import supply_chain_simulation_ontology.elements.actions.Buy;
+import supply_chain_simulation_ontology.elements.actions.ConfirmOrder;
+import supply_chain_simulation_ontology.elements.actions.DeliverOrder;
+import supply_chain_simulation_ontology.elements.actions.RefuseOrder;
+import supply_chain_simulation_ontology.elements.actions.Supply;
+import supply_chain_simulation_ontology.elements.concepts.Delivery;
 import supply_chain_simulation_ontology.elements.concepts.Desktop;
 import supply_chain_simulation_ontology.elements.concepts.Laptop;
 import supply_chain_simulation_ontology.elements.concepts.Order;
@@ -80,6 +87,8 @@ public class CustomerAgent extends Agent {
 			e.printStackTrace();
 		}
 		
+		addBehaviour(new ReceiveReceipt(this));
+//		addBehaviour(new ReceiveOrder(this));
 		addBehaviour(new StartBehaviours(this));
 		
 	}
@@ -134,6 +143,56 @@ public class CustomerAgent extends Agent {
 					myAgent.doDelete();
 				}
 			} else {
+				block();
+			}
+		}
+		
+	}
+	
+	public class ReceiveReceipt extends CyclicBehaviour {
+
+		public ReceiveReceipt(Agent agent) {
+			super(agent);
+		}
+		
+		@Override
+		public void action() {
+			//try to receive a message
+			MessageTemplate mt =
+					MessageTemplate.or(
+							MessageTemplate.MatchPerformative(ACLMessage.CONFIRM),
+							MessageTemplate.MatchPerformative(ACLMessage.REFUSE)
+							);
+			ACLMessage msg = myAgent.receive(mt);
+			
+			if (msg != null) {
+				try {
+					ContentElement ce = null;
+					ce = getContentManager().extractContent(msg);
+					if(ce instanceof Action) {
+						Concept action = ((Action)ce).getAction();
+						if (action instanceof RefuseOrder) {
+							RefuseOrder refuse_order = (RefuseOrder)action;
+							System.out.println("-> " + myAgent.getLocalName() + ": I will try another order again tomorrow...");
+						} else {
+							ConfirmOrder confirm_order = (ConfirmOrder)action;
+							System.out.println("-> " + myAgent.getLocalName() + ": Thank you for confirming...");
+						}
+					}
+				}
+				catch (CodecException ce) {
+					ce.printStackTrace();
+				}
+				catch (OntologyException oe) {
+					oe.printStackTrace();
+				}
+				
+			} else {
+				//put the behaviour to sleep until a message arrives
+				System.out.println(
+						"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+						"   * " + "Waiting for message..."
+							);
 				block();
 			}
 		}
@@ -242,7 +301,6 @@ public class CustomerAgent extends Agent {
 			
 			// Action Wrapper
 			Action request = new Action();
-//			request.setAction(myOrder);
 			buy = new Buy();
 			buy.setOrder(myOrder);
 			request.setAction(buy);
@@ -267,6 +325,56 @@ public class CustomerAgent extends Agent {
 		
 	}
 	
+	public class ReceiveOrder extends CyclicBehaviour {
+		
+		public ReceiveOrder(Agent agent) {
+			super(agent);
+		}
+		
+		@Override
+		public void action() {
+			
+			//try to receive a message
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			ACLMessage msg = myAgent.receive(mt);
+			
+			if (msg != null) {
+				
+				try {
+					ContentElement ce = null;
+					ce = getContentManager().extractContent(msg);
+					if(ce instanceof Action) {
+						Concept action = ((Action)ce).getAction();
+						if (action instanceof DeliverOrder) {
+							DeliverOrder order = (DeliverOrder)action;
+							PC pc = order.getMyPC();
+							if (pc instanceof PC) {
+								// Print out received PC
+								System.out.println("-> " + myAgent.getLocalName() + ": " + pc.toString());
+							}
+						}
+					}
+				}
+				catch (CodecException ce) {
+					ce.printStackTrace();
+				}
+				catch (OntologyException oe) {
+					oe.printStackTrace();
+				}
+				
+			} else {
+				//put the behaviour to sleep until a message arrives
+				System.out.println(
+						"\n" + "-> " + myAgent.getLocalName() + ": " + "\n" +
+						"   * " + "Waiting for message..."
+							);
+				block();
+			}
+			
+		}
+		
+	}
+	
 	public class EndDay extends OneShotBehaviour {
 		
 		public EndDay(Agent a) {
@@ -280,14 +388,6 @@ public class CustomerAgent extends Agent {
 			msg.setContent("done");
 			doWait(400);
 			myAgent.send(msg);
-			
-//			//send a message to each seller that we have finished
-//			ACLMessage buyerDone = new ACLMessage(ACLMessage.INFORM);
-//			buyerDone.setContent("done");
-//			for(AID seller : sellers) {
-//				buyerDone.addReceiver(seller);
-//			}
-//			myAgent.send(buyerDone);
 		}
 		
 	}

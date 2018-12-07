@@ -1,8 +1,10 @@
 package supply_chain_simulation_ontology.elements.concepts;
 
+import jade.content.Concept;
 import jade.content.onto.annotations.Slot;
+import jade.core.AID;
 
-public class Delivery {
+public class Delivery implements Concept {
 	
 	// Mandatory
 	PC myPC;
@@ -10,6 +12,7 @@ public class Delivery {
 	// Not Mandatory
 	private Integer deliver_in_days;
 	private Integer total_cost;
+	private AID receiver;
 
 	@Override
 	public String toString() {
@@ -40,6 +43,15 @@ public class Delivery {
 
 	public void setTotal_cost(Integer total_cost) {
 		this.total_cost = total_cost;
+	}
+
+	@Slot ( mandatory = true )
+	public AID getReceiver() {
+		return receiver;
+	}
+
+	public void setReceiver(AID receiver) {
+		this.receiver = receiver;
 	}
 	
 }
