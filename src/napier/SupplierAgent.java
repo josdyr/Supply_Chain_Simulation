@@ -269,7 +269,7 @@ public class SupplierAgent extends Agent {
 									);
 						getContentManager().fillContent(sup_msg, inform);
 						send(sup_msg);
-						System.out.println(sup_msg.toString());
+//						System.out.println(sup_msg.toString());
 					}
 					catch (CodecException _ce) {
 						_ce.printStackTrace();
